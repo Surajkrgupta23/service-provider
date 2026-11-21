@@ -17,8 +17,11 @@ const otpView        = document.getElementById('otpView');
 const registerView   = document.getElementById('registerView');
 const pendingView    = document.getElementById('pendingView');
 const dashboardView  = document.getElementById('dashboardView');
+const profileView    = document.getElementById('profileView');
 const topbarActions  = document.getElementById('topbarActions');
 const toastBox       = document.getElementById('toastBox');
+
+let previousView = 'dashboard';
 
 // Initialize on Load
 document.addEventListener('DOMContentLoaded', () => {
@@ -44,11 +47,16 @@ function showToast(message, isError = false) {
 
 // Switch between screens
 function switchView(viewName) {
+    // Reset scroll to top
+    const container = document.querySelector('.app-container');
+    if (container) container.scrollTop = 0;
+
     loginView.classList.remove('active');
     otpView.classList.remove('active');
     registerView.classList.remove('active');
     pendingView.classList.remove('active');
     dashboardView.classList.remove('active');
+    if (profileView) profileView.classList.remove('active');
 
     if (viewName === 'login') {
         loginView.classList.add('active');
@@ -67,6 +75,10 @@ function switchView(viewName) {
     } else if (viewName === 'dashboard') {
         dashboardView.classList.add('active');
         topbarActions.style.display = 'flex';
+        updateHeaderAndProfile();
+    } else if (viewName === 'profile') {
+        if (profileView) profileView.classList.add('active');
+        topbarActions.style.display = 'none';
         updateHeaderAndProfile();
     }
 }
@@ -418,90 +430,72 @@ async function loadDashboard() {
     }
 }
 
-// Update Header Avatar and Profile Modal Data
+// Update Header Avatar and Dedicated Profile Page Data
 function updateHeaderAndProfile() {
     const data = providerData || {};
-    const name = data.name || 'पार्टनर';
-    const initial = name.trim().charAt(0).toUpperCase() || 'P';
-    const category = data.category || 'सेवा साथी';
-    const city = data.city || 'शहर';
+    const name = data.name || 'सूरज गुप्ता';
+    const initial = name.trim().charAt(0).toUpperCase() || 'S';
+    const category = data.category || 'Electrician';
+    const city = data.city || 'Lucknow';
     const isVerified = (data.verification_status === 'verified') || (dashboardView && dashboardView.classList.contains('active'));
 
     // Topbar
     const topAvatar = document.getElementById('topbarAvatarInitial');
     if (topAvatar) topAvatar.innerText = initial;
 
-    // Modal Header
-    const modalAvatar = document.getElementById('modalAvatarInitial');
-    const modalName = document.getElementById('modalPartnerName');
-    const modalCat = document.getElementById('modalPartnerCategory');
-    const modalStatus = document.getElementById('modalPartnerStatus');
+    // Full Profile Page Elements
+    const pageAvatar = document.getElementById('pageAvatarInitial');
+    const pageName = document.getElementById('pagePartnerName');
+    const pageSub = document.getElementById('pagePartnerSubtitle');
+    const pageBadge = document.getElementById('pagePartnerBadge');
 
-    if (modalAvatar) modalAvatar.innerText = initial;
-    if (modalName) modalName.innerText = name;
-    if (modalCat) modalCat.innerText = `${category} • ${city}`;
-    if (modalStatus) {
+    if (pageAvatar) pageAvatar.innerText = initial;
+    if (pageName) pageName.innerText = name;
+    if (pageSub) pageSub.innerText = `${category} • ${city}`;
+    if (pageBadge) {
         if (isVerified) {
-            modalStatus.innerText = '✓ सत्यापित सेवा साथी (Verified)';
-            modalStatus.style.background = '#ecfdf5';
-            modalStatus.style.color = '#047857';
+            pageBadge.innerText = '✓ सत्यापित सेवा साथी (Verified Partner)';
+            pageBadge.style.background = '#ecfdf5';
+            pageBadge.style.color = '#047857';
+            pageBadge.style.borderColor = '#a7f3d0';
         } else {
-            modalStatus.innerText = 'सत्यापन प्रक्रियाधीन (Under Review)';
-            modalStatus.style.background = '#fef3c7';
-            modalStatus.style.color = '#b45309';
+            pageBadge.innerText = 'सत्यापन प्रक्रियाधीन (Under Review)';
+            pageBadge.style.background = '#fef3c7';
+            pageBadge.style.color = '#b45309';
+            pageBadge.style.borderColor = '#fde68a';
         }
     }
 
-    // Submodal Details
-    if (document.getElementById('detailName')) document.getElementById('detailName').innerText = name;
-    if (document.getElementById('detailPhone')) document.getElementById('detailPhone').innerText = data.phone ? `+91 ${data.phone}` : '-';
-    if (document.getElementById('detailEmail')) document.getElementById('detailEmail').innerText = data.email || '-';
-    if (document.getElementById('detailSkills')) document.getElementById('detailSkills').innerText = category;
-    if (document.getElementById('detailCity')) document.getElementById('detailCity').innerText = city;
-    if (document.getElementById('detailExp')) document.getElementById('detailExp').innerText = `${data.experience_years || '1'} वर्ष`;
-    if (document.getElementById('detailIdType')) document.getElementById('detailIdType').innerText = (data.id_type || 'aadhaar').toUpperCase();
-    if (document.getElementById('detailIdNumber')) {
-        const rawId = data.id_number || 'XXXX';
-        document.getElementById('detailIdNumber').innerText = rawId.length > 4 ? `XXXX-XXXX-${rawId.slice(-4)}` : rawId;
+    // Detail Fields on Profile Page
+    if (document.getElementById('pageNameVal')) document.getElementById('pageNameVal').innerText = name;
+    if (document.getElementById('pagePhoneVal')) document.getElementById('pagePhoneVal').innerText = data.phone ? `+91 ${data.phone}` : '-';
+    if (document.getElementById('pageEmailVal')) document.getElementById('pageEmailVal').innerText = data.email || '-';
+    if (document.getElementById('pageSkillsVal')) document.getElementById('pageSkillsVal').innerText = category;
+    if (document.getElementById('pageCityVal')) document.getElementById('pageCityVal').innerText = city;
+    if (document.getElementById('pageExpVal')) document.getElementById('pageExpVal').innerText = `${data.experience_years || '3-5'} वर्ष`;
+    if (document.getElementById('pageIdTypeVal')) document.getElementById('pageIdTypeVal').innerText = (data.id_type || 'aadhaar').toUpperCase();
+    if (document.getElementById('pageIdNumVal')) {
+        const rawId = data.id_number || 'XXXX8921';
+        document.getElementById('pageIdNumVal').innerText = rawId.length > 4 ? `XXXX-XXXX-${rawId.slice(-4)}` : rawId;
+    }
+    if (document.getElementById('pageKycStatusVal')) {
+        document.getElementById('pageKycStatusVal').innerText = isVerified ? '✓ एडमिन द्वारा सत्यापित (Approved)' : 'प्रक्रियाधीन (Under Review)';
     }
 }
 
-// Open/Close Profile Bottom Sheet
-function openProfileModal() {
-    updateHeaderAndProfile();
-    const overlay = document.getElementById('profileModalOverlay');
-    if (overlay) overlay.classList.add('open');
+// Open Dedicated Profile Page
+function openProfilePage() {
+    if (dashboardView && dashboardView.classList.contains('active')) {
+        previousView = 'dashboard';
+    } else if (pendingView && pendingView.classList.contains('active')) {
+        previousView = 'pending';
+    }
+    switchView('profile');
 }
 
-function closeProfileModal(event) {
-    if (event && event.target && event.target.id !== 'profileModalOverlay') return;
-    const overlay = document.getElementById('profileModalOverlay');
-    if (overlay) overlay.classList.remove('open');
-}
-
-// Submodal Handlers
-function openProfileDetailsSubmodal() {
-    closeProfileModal();
-    const modal = document.getElementById('profileDetailsModal');
-    if (modal) modal.classList.add('open');
-}
-
-function openKycSubmodal() {
-    closeProfileModal();
-    const modal = document.getElementById('kycDetailsModal');
-    if (modal) modal.classList.add('open');
-}
-
-function openSupportSubmodal() {
-    closeProfileModal();
-    const modal = document.getElementById('supportDetailsModal');
-    if (modal) modal.classList.add('open');
-}
-
-function closeSubmodal(modalId, event) {
-    if (event && event.target && event.target.id !== modalId) return;
-    const modal = document.getElementById(modalId);
-    if (modal) modal.classList.remove('open');
+// Go Back to Previous View from Profile Page
+function goBackFromProfile() {
+    switchView(previousView || 'dashboard');
 }
 
 // Logout

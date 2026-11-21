@@ -5,6 +5,7 @@ import '../../../core/constants/api_endpoints.dart';
 import '../../../core/network/api_client.dart';
 import '../../auth/presentation/login_screen.dart';
 import '../../dashboard/presentation/dashboard_screen.dart';
+import '../../profile/presentation/profile_screen.dart';
 
 class PendingScreen extends StatefulWidget {
   final String? phone;
@@ -38,156 +39,6 @@ class _PendingScreenState extends State<PendingScreen> {
         });
       }
     } catch (_) {}
-  }
-
-  void _showProfileModal() {
-    final name = (_providerData?['name'] as String?) ?? 'पार्टनर';
-    final category = (_providerData?['category'] as String?) ?? 'सेवा साथी';
-    final city = (_providerData?['city'] as String?) ?? '';
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        return Container(
-          constraints: const BoxConstraints(maxWidth: 480),
-          margin: EdgeInsets.only(
-            left: MediaQuery.of(context).size.width > 500 ? (MediaQuery.of(context).size.width - 440) / 2 : 12,
-            right: MediaQuery.of(context).size.width > 500 ? (MediaQuery.of(context).size.width - 440) / 2 : 12,
-            bottom: 24,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: const [
-              BoxShadow(color: Colors.black26, blurRadius: 30, offset: Offset(0, 10)),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 26,
-                      backgroundColor: const Color(0xFFFFEDD5),
-                      child: Text(
-                        name.isNotEmpty ? name[0].toUpperCase() : 'P',
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.brandOrangeDark),
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: Colors.black87)),
-                          Text('$category • $city', style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFEF3C7),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Text(
-                              'सत्यापन प्रक्रियाधीन (Under Review)',
-                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFB45309)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const Divider(height: 1),
-                const SizedBox(height: 8),
-
-                // 3 Options
-                _buildOptionTile(
-                  icon: Icons.person_outline_rounded,
-                  title: 'मेरी प्रोफाइल (My Profile)',
-                  subtitle: 'व्यक्तिगत जानकारी एवं कार्य अनुभव',
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('नाम: $name | मोबाइल: ${_providerData?['phone'] ?? widget.phone ?? '-'}')),
-                    );
-                  },
-                ),
-                _buildOptionTile(
-                  icon: Icons.badge_outlined,
-                  title: 'केवाईसी एवं दस्तावेज़ (KYC & Documents)',
-                  subtitle: 'आधार, पैन एवं सत्यापन स्थिति',
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('दस्तावेज़ समीक्षाधीन (Under Review)')),
-                    );
-                  },
-                ),
-                _buildOptionTile(
-                  icon: Icons.headset_mic_outlined,
-                  title: 'सेटिंग्स एवं सहायता (Settings & Support)',
-                  subtitle: '24x7 हेल्पलाइन: 1800-889-CLAP',
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('पार्टनर हेल्पलाइन: 1800-889-CLAP')),
-                    );
-                  },
-                ),
-
-                const Divider(height: 16),
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                  leading: const CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Color(0xFFFEE2E2),
-                    child: Icon(Icons.logout_rounded, color: Colors.red, size: 18),
-                  ),
-                  title: const Text('लॉगआउट (Logout)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.red)),
-                  onTap: () async {
-                    Navigator.pop(ctx);
-                    await ApiClient.clearAuth();
-                    if (!mounted) return;
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      (route) => false,
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildOptionTile({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      leading: CircleAvatar(
-        radius: 18,
-        backgroundColor: const Color(0xFFFFF7ED),
-        child: Icon(icon, color: AppColors.brandOrange, size: 18),
-      ),
-      title: Text(title, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: Colors.black87)),
-      subtitle: Text(subtitle, style: const TextStyle(fontSize: 11, color: Colors.grey)),
-      trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
-      onTap: onTap,
-    );
   }
 
   Future<void> _checkStatus() async {
@@ -292,9 +143,16 @@ class _PendingScreenState extends State<PendingScreen> {
                     ],
                   ),
 
-                  // Right Action: Profile Option
+                  // Right Action: Profile Option (Navigates to Full Page)
                   InkWell(
-                    onTap: _showProfileModal,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ProfileScreen(provider: _providerData),
+                        ),
+                      );
+                    },
                     borderRadius: BorderRadius.circular(24),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -323,7 +181,7 @@ class _PendingScreenState extends State<PendingScreen> {
                             ),
                           ),
                           const SizedBox(width: 4),
-                          const Icon(Icons.arrow_drop_down_rounded, color: AppColors.brandOrange, size: 20),
+                          const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.brandOrange, size: 13),
                         ],
                       ),
                     ),
@@ -335,9 +193,10 @@ class _PendingScreenState extends State<PendingScreen> {
         ),
       ),
       body: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 440),
               child: Column(
