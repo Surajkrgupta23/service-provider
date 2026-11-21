@@ -7,7 +7,7 @@ const API_BASE = 'backend/api/index.php';
 
 // State
 let currentPhone = '';
-let selectedCategory = 'Electrician';
+let selectedCategories = ['Electrician'];
 let authToken = localStorage.getItem('cp_auth_token') || '';
 let providerData = JSON.parse(localStorage.getItem('cp_provider_data') || 'null');
 
@@ -113,32 +113,86 @@ function clearOtpBoxes() {
     });
 }
 
+// Multi-Select Category Dropdown Logic
+function toggleCategoryDropdown() {
+    const menu = document.getElementById('categoryDropdownMenu');
+    menu.classList.toggle('open');
+}
+
+// Close dropdown when clicked outside
+document.addEventListener('click', (e) => {
+    const dropdown = document.querySelector('.multiselect-dropdown');
+    const menu = document.getElementById('categoryDropdownMenu');
+    if (dropdown && !dropdown.contains(e.target) && menu) {
+        menu.classList.remove('open');
+    }
+});
+
+function toggleCategory(catName) {
+    const idx = selectedCategories.indexOf(catName);
+    if (idx > -1) {
+        if (selectedCategories.length > 1) {
+            selectedCategories.splice(idx, 1);
+        } else {
+            showToast('कम से कम 1 श्रेणी चुनना आवश्यक है', true);
+            return;
+        }
+    } else {
+        selectedCategories.push(catName);
+    }
+    renderSelectedCategories();
+}
+
+function renderSelectedCategories() {
+    const textEl = document.getElementById('selectedCategoriesText');
+    const chipsEl = document.getElementById('selectedCategoryChips');
+
+    if (textEl) {
+        textEl.innerText = `${selectedCategories.length} श्रेणियां चयनित: ${selectedCategories.join(', ')}`;
+    }
+
+    if (chipsEl) {
+        chipsEl.innerHTML = '';
+        selectedCategories.forEach(cat => {
+            const chip = document.createElement('div');
+            chip.className = 'selected-chip';
+            chip.innerHTML = `<span>${cat}</span><i class="fa-solid fa-circle-xmark" onclick="toggleCategory('${cat}')"></i>`;
+            chipsEl.appendChild(chip);
+        });
+    }
+
+    // Update checkboxes in dropdown
+    document.querySelectorAll('.multiselect-item input[type="checkbox"]').forEach(cb => {
+        cb.checked = selectedCategories.includes(cb.value);
+    });
+}
+
 // Load Categories from API
 async function loadCategories() {
     try {
         const res = await fetch(`${API_BASE}?action=categories`);
         const json = await res.json();
         if (json.success && json.data) {
-            const grid = document.getElementById('regCategoryGrid');
-            grid.innerHTML = '';
-            json.data.forEach((cat, idx) => {
-                const chip = document.createElement('div');
-                chip.className = `cat-chip ${idx === 0 ? 'selected' : ''}`;
-                chip.innerHTML = `<i class="${cat.icon || 'fa-solid fa-wrench'}"></i><span>${cat.name}</span>`;
-                chip.onclick = () => selectCategory(cat.name, chip);
-                grid.appendChild(chip);
-                if (idx === 0) selectedCategory = cat.name;
-            });
+            const menu = document.getElementById('categoryDropdownMenu');
+            if (menu) {
+                menu.innerHTML = '';
+                json.data.forEach((cat) => {
+                    const item = document.createElement('label');
+                    item.className = 'multiselect-item';
+                    const isChecked = selectedCategories.includes(cat.name);
+                    item.innerHTML = `
+                        <input type="checkbox" value="${cat.name}" ${isChecked ? 'checked' : ''} onchange="toggleCategory('${cat.name}')">
+                        <i class="${cat.icon || 'fa-solid fa-wrench'}" style="color: var(--brand-orange); width: 18px;"></i>
+                        <span>${cat.name}</span>
+                    `;
+                    menu.appendChild(item);
+                });
+                renderSelectedCategories();
+            }
         }
     } catch (e) {
         console.error('Failed to load categories', e);
     }
-}
-
-function selectCategory(catName, chipEl) {
-    selectedCategory = catName;
-    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('selected'));
-    chipEl.classList.add('selected');
 }
 
 // 1. Send OTP Form Submit
@@ -245,7 +299,7 @@ document.getElementById('partnerRegForm').addEventListener('submit', async (e) =
     submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> प्रोफाइल सबमिट हो रही है...';
 
     const formData = new FormData(document.getElementById('partnerRegForm'));
-    formData.append('category', selectedCategory);
+    formData.append('category', selectedCategories.join(', '));
 
     try {
         const res = await fetch(`${API_BASE}?action=register`, {

@@ -104,7 +104,12 @@ class AuthController {
         $phone    = trim($input['phone'] ?? '');
         $email    = trim($input['email'] ?? '');
         $password = $input['password'] ?? '123456';
-        $category = trim($input['category'] ?? '');
+        $rawCategory = $input['category'] ?? '';
+        if (is_array($rawCategory)) {
+            $category = implode(', ', array_filter(array_map('trim', $rawCategory)));
+        } else {
+            $category = trim((string)$rawCategory);
+        }
         $city     = trim($input['city'] ?? '');
         $expYears = (int)($input['experience_years'] ?? 0);
         $idType   = trim($input['id_type'] ?? 'Aadhar Card');

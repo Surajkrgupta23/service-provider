@@ -98,8 +98,10 @@ class _OtpScreenState extends State<OtpScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: Column(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Column(
               children: [
                 // Figma Logo
                 Container(
@@ -236,6 +238,7 @@ class _OtpScreenState extends State<OtpScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

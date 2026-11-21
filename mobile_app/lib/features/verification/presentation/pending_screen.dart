@@ -59,11 +59,14 @@ class _PendingScreenState extends State<PendingScreen> {
     return Scaffold(
       backgroundColor: AppColors.bgCream,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
               // Pending Card
               Container(
                 padding: const EdgeInsets.all(24),
@@ -148,6 +151,8 @@ class _PendingScreenState extends State<PendingScreen> {
             ],
           ),
         ),
+      ),
+    ),
       ),
     );
   }

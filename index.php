@@ -148,10 +148,17 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">अपनी सेवा श्रेणी चुनें (Select Skill) *</label>
-                            <div id="regCategoryGrid" class="category-chip-grid">
-                                <!-- Populated dynamically -->
+                            <label class="form-label">अपनी सेवा श्रेणियां चुनें (Select Skills - Multiple) *</label>
+                            <div class="multiselect-dropdown">
+                                <div id="categoryDropdownBtn" class="multiselect-btn" onclick="toggleCategoryDropdown()">
+                                    <span id="selectedCategoriesText">श्रेणियां चुनें (Click to Select)</span>
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                                <div id="categoryDropdownMenu" class="multiselect-menu">
+                                    <!-- Populated dynamically with checkboxes -->
+                                </div>
                             </div>
+                            <div id="selectedCategoryChips" class="selected-chips-box"></div>
                         </div>
 
                         <div class="form-row">
