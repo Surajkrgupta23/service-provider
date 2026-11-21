@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
+import '../../../core/constants/api_endpoints.dart';
+import '../../../core/config/app_config.dart';
 import '../../../core/network/api_client.dart';
 import 'otp_screen.dart';
 import 'register_screen.dart';
@@ -28,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final response = await ApiClient.dio.post(
         '',
-        queryParameters: {'action': 'send-otp'},
+        queryParameters: {'action': ApiEndpoints.sendOtp},
         data: {'phone': phone},
       );
 
@@ -83,9 +85,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: const Icon(Icons.handshake_rounded, color: Colors.white, size: 40),
                 ),
                 const SizedBox(height: 14),
-                const Text(
-                  'Cooperative Clap',
-                  style: TextStyle(
+                Text(
+                  AppConfig.appName,
+                  style: const TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.w900,
                     color: AppColors.textHeading,
@@ -93,9 +95,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'आपका विश्वसनीय सेवा साथी',
-                  style: TextStyle(
+                Text(
+                  AppConfig.appTagline,
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textSubheading,

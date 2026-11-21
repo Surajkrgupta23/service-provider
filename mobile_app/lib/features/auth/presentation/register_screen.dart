@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
+import '../../../core/constants/api_endpoints.dart';
 import '../../../core/network/api_client.dart';
 import '../../verification/presentation/pending_screen.dart';
 
@@ -55,7 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       final response = await ApiClient.dio.post(
         '',
-        queryParameters: {'action': 'register'},
+        queryParameters: {'action': ApiEndpoints.register},
         data: {
           'name': name,
           'phone': phone,

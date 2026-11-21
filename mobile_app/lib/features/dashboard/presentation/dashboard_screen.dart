@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import '../../../core/constants/colors.dart';
+import '../../../core/constants/api_endpoints.dart';
 import '../../../core/network/api_client.dart';
 import '../../auth/presentation/login_screen.dart';
 
@@ -26,7 +27,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final token = await ApiClient.getToken();
       final response = await ApiClient.dio.get(
         '',
-        queryParameters: {'action': 'dashboard'},
+        queryParameters: {'action': ApiEndpoints.dashboard},
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import '../../../core/constants/colors.dart';
+import '../../../core/constants/api_endpoints.dart';
 import '../../../core/network/api_client.dart';
 import '../../auth/presentation/login_screen.dart';
 import '../../dashboard/presentation/dashboard_screen.dart';
@@ -22,7 +23,7 @@ class _PendingScreenState extends State<PendingScreen> {
       final token = await ApiClient.getToken();
       final response = await ApiClient.dio.get(
         '',
-        queryParameters: {'action': 'status'},
+        queryParameters: {'action': ApiEndpoints.status},
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
