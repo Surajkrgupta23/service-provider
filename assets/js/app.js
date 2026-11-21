@@ -63,9 +63,11 @@ function switchView(viewName) {
     } else if (viewName === 'pending') {
         pendingView.classList.add('active');
         topbarActions.style.display = 'flex';
+        updateHeaderAndProfile();
     } else if (viewName === 'dashboard') {
         dashboardView.classList.add('active');
         topbarActions.style.display = 'flex';
+        updateHeaderAndProfile();
     }
 }
 
@@ -398,11 +400,14 @@ async function loadDashboard() {
 
         if (json.success) {
             const data = json.data;
+            providerData = data.provider;
+            localStorage.setItem('cp_provider_data', JSON.stringify(providerData));
             document.getElementById('dashWelcome').innerText = data.welcome_message;
             document.getElementById('dashProviderName').innerText = data.provider.name;
             document.getElementById('dashCategory').innerText = data.provider.category;
             document.getElementById('dashCity').innerText = data.provider.city;
 
+            updateHeaderAndProfile();
             switchView('dashboard');
         } else {
             renderPendingScreen('pending_verification', providerData ? providerData.name : '');
@@ -411,6 +416,92 @@ async function loadDashboard() {
     } catch (e) {
         showToast('डैशबोर्ड लोड करने में त्रुटि', true);
     }
+}
+
+// Update Header Avatar and Profile Modal Data
+function updateHeaderAndProfile() {
+    const data = providerData || {};
+    const name = data.name || 'पार्टनर';
+    const initial = name.trim().charAt(0).toUpperCase() || 'P';
+    const category = data.category || 'सेवा साथी';
+    const city = data.city || 'शहर';
+    const isVerified = (data.verification_status === 'verified') || (dashboardView && dashboardView.classList.contains('active'));
+
+    // Topbar
+    const topAvatar = document.getElementById('topbarAvatarInitial');
+    if (topAvatar) topAvatar.innerText = initial;
+
+    // Modal Header
+    const modalAvatar = document.getElementById('modalAvatarInitial');
+    const modalName = document.getElementById('modalPartnerName');
+    const modalCat = document.getElementById('modalPartnerCategory');
+    const modalStatus = document.getElementById('modalPartnerStatus');
+
+    if (modalAvatar) modalAvatar.innerText = initial;
+    if (modalName) modalName.innerText = name;
+    if (modalCat) modalCat.innerText = `${category} • ${city}`;
+    if (modalStatus) {
+        if (isVerified) {
+            modalStatus.innerText = '✓ सत्यापित सेवा साथी (Verified)';
+            modalStatus.style.background = '#ecfdf5';
+            modalStatus.style.color = '#047857';
+        } else {
+            modalStatus.innerText = 'सत्यापन प्रक्रियाधीन (Under Review)';
+            modalStatus.style.background = '#fef3c7';
+            modalStatus.style.color = '#b45309';
+        }
+    }
+
+    // Submodal Details
+    if (document.getElementById('detailName')) document.getElementById('detailName').innerText = name;
+    if (document.getElementById('detailPhone')) document.getElementById('detailPhone').innerText = data.phone ? `+91 ${data.phone}` : '-';
+    if (document.getElementById('detailEmail')) document.getElementById('detailEmail').innerText = data.email || '-';
+    if (document.getElementById('detailSkills')) document.getElementById('detailSkills').innerText = category;
+    if (document.getElementById('detailCity')) document.getElementById('detailCity').innerText = city;
+    if (document.getElementById('detailExp')) document.getElementById('detailExp').innerText = `${data.experience_years || '1'} वर्ष`;
+    if (document.getElementById('detailIdType')) document.getElementById('detailIdType').innerText = (data.id_type || 'aadhaar').toUpperCase();
+    if (document.getElementById('detailIdNumber')) {
+        const rawId = data.id_number || 'XXXX';
+        document.getElementById('detailIdNumber').innerText = rawId.length > 4 ? `XXXX-XXXX-${rawId.slice(-4)}` : rawId;
+    }
+}
+
+// Open/Close Profile Bottom Sheet
+function openProfileModal() {
+    updateHeaderAndProfile();
+    const overlay = document.getElementById('profileModalOverlay');
+    if (overlay) overlay.classList.add('open');
+}
+
+function closeProfileModal(event) {
+    if (event && event.target && event.target.id !== 'profileModalOverlay') return;
+    const overlay = document.getElementById('profileModalOverlay');
+    if (overlay) overlay.classList.remove('open');
+}
+
+// Submodal Handlers
+function openProfileDetailsSubmodal() {
+    closeProfileModal();
+    const modal = document.getElementById('profileDetailsModal');
+    if (modal) modal.classList.add('open');
+}
+
+function openKycSubmodal() {
+    closeProfileModal();
+    const modal = document.getElementById('kycDetailsModal');
+    if (modal) modal.classList.add('open');
+}
+
+function openSupportSubmodal() {
+    closeProfileModal();
+    const modal = document.getElementById('supportDetailsModal');
+    if (modal) modal.classList.add('open');
+}
+
+function closeSubmodal(modalId, event) {
+    if (event && event.target && event.target.id !== modalId) return;
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.remove('open');
 }
 
 // Logout

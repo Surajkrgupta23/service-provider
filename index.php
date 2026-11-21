@@ -12,20 +12,28 @@
 <body>
 
     <div class="app-container">
-        <!-- Top App Bar (Dashboard & Profile view) -->
-        <header class="app-topbar">
-            <div class="topbar-brand">
-                <div class="topbar-logo">
+        <!-- Top App Header Bar (Figma Exact Header) -->
+        <header class="app-header-bar">
+            <div class="header-brand">
+                <div class="header-logo-circle">
                     <i class="fa-solid fa-handshake"></i>
                 </div>
-                <div class="topbar-title">Cooperative Clap</div>
+                <div class="header-brand-text">
+                    <span class="header-brand-name">Cooperative Clap</span>
+                    <span class="header-brand-tag">पार्टनर पोर्टल (Partner Portal)</span>
+                </div>
             </div>
-            <div id="topbarActions" class="topbar-icons" style="display: none;">
-                <button class="icon-btn" onclick="checkStatus()" title="ताज़ा करें">
+            
+            <div id="topbarActions" class="header-actions" style="display: none;">
+                <button type="button" class="header-refresh-btn" onclick="checkStatus()" title="ताज़ा करें (Refresh)">
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
-                <button class="icon-btn" onclick="logout()" title="लॉगआउट">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                
+                <!-- Profile Trigger Pill Button -->
+                <button type="button" class="header-profile-btn" onclick="openProfileModal()" title="मेरी प्रोफाइल (My Profile)">
+                    <div class="header-avatar-circle" id="topbarAvatarInitial">P</div>
+                    <span class="header-profile-label" id="topbarProfileName">प्रोफाइल</span>
+                    <i class="fa-solid fa-chevron-down" style="font-size: 0.72rem; color: var(--brand-orange);"></i>
                 </button>
             </div>
         </header>
@@ -355,6 +363,149 @@
             </section>
 
         </main>
+    </div>
+
+    <!-- ========================================================
+         PROFILE MODAL BOTTOM SHEET (With 2-3 Future Options)
+         ======================================================== -->
+    <div id="profileModalOverlay" class="profile-modal-overlay" onclick="closeProfileModal(event)">
+        <div class="profile-modal-card" onclick="event.stopPropagation()">
+            <!-- Drag Handle Bar -->
+            <div class="profile-modal-handle"></div>
+
+            <!-- Profile Summary Card -->
+            <div class="profile-user-header">
+                <div class="profile-user-avatar" id="modalAvatarInitial">P</div>
+                <div class="profile-user-meta">
+                    <h3 id="modalPartnerName">पार्टनर नाम</h3>
+                    <p id="modalPartnerCategory">सेवा साथी • शहर</p>
+                    <div id="modalPartnerStatus" class="profile-status-pill">✓ सत्यापित सेवा साथी</div>
+                </div>
+                <button type="button" class="profile-modal-close-btn" onclick="closeProfileModal()" title="बंद करें">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="profile-divider"></div>
+
+            <!-- 2-3 Future Options requested by user -->
+            <div class="profile-options-list">
+                <!-- Option 1: मेरी प्रोफाइल -->
+                <div class="profile-option-item" onclick="openProfileDetailsSubmodal()">
+                    <div class="profile-option-icon bg-orange-soft">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div class="profile-option-content">
+                        <h4>मेरी प्रोफाइल (My Profile)</h4>
+                        <p>व्यक्तिगत जानकारी, मोबाइल एवं कार्य अनुभव</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right profile-option-arrow"></i>
+                </div>
+
+                <!-- Option 2: केवाईसी एवं दस्तावेज़ -->
+                <div class="profile-option-item" onclick="openKycSubmodal()">
+                    <div class="profile-option-icon bg-emerald-soft">
+                        <i class="fa-solid fa-id-card"></i>
+                    </div>
+                    <div class="profile-option-content">
+                        <h4>केवाईसी एवं दस्तावेज़ (KYC & Documents)</h4>
+                        <p>आधार कार्ड, पैन कार्ड एवं सत्यापन स्थिति</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right profile-option-arrow"></i>
+                </div>
+
+                <!-- Option 3: सेटिंग्स एवं सहायता -->
+                <div class="profile-option-item" onclick="openSupportSubmodal()">
+                    <div class="profile-option-icon bg-blue-soft">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <div class="profile-option-content">
+                        <h4>सेटिंग्स एवं सहायता (Settings & Support)</h4>
+                        <p>24x7 पार्टनर हेल्पलाइन एवं ऐप सेटिंग्स</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right profile-option-arrow"></i>
+                </div>
+            </div>
+
+            <div class="profile-divider"></div>
+
+            <!-- Logout Tile -->
+            <div class="profile-option-item profile-logout-item" onclick="closeProfileModal(); logout();">
+                <div class="profile-option-icon bg-red-soft">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                </div>
+                <div class="profile-option-content">
+                    <h4 style="color: #dc2626;">लॉगआउट (Logout)</h4>
+                    <p>खाते से सुरक्षित बाहर निकलें</p>
+                </div>
+                <i class="fa-solid fa-chevron-right profile-option-arrow" style="color: #dc2626;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUBMODAL 1: Profile Details View -->
+    <div id="profileDetailsModal" class="submodal-overlay" onclick="closeSubmodal('profileDetailsModal', event)">
+        <div class="submodal-card" onclick="event.stopPropagation()">
+            <div class="submodal-header">
+                <h3><i class="fa-solid fa-user" style="color: var(--brand-orange);"></i> मेरी प्रोफाइल विवरण</h3>
+                <button type="button" class="submodal-close-btn" onclick="closeSubmodal('profileDetailsModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="submodal-body">
+                <div class="info-row"><span class="info-label">पूरा नाम:</span><span id="detailName" class="info-val">-</span></div>
+                <div class="info-row"><span class="info-label">मोबाइल नंबर:</span><span id="detailPhone" class="info-val">-</span></div>
+                <div class="info-row"><span class="info-label">ईमेल पता:</span><span id="detailEmail" class="info-val">-</span></div>
+                <div class="info-row"><span class="info-label">सेवा श्रेणियां:</span><span id="detailSkills" class="info-val">-</span></div>
+                <div class="info-row"><span class="info-label">शहर / क्षेत्र:</span><span id="detailCity" class="info-val">-</span></div>
+                <div class="info-row"><span class="info-label">कार्य अनुभव:</span><span id="detailExp" class="info-val">-</span></div>
+                <div class="info-row"><span class="info-label">आईडी प्रकार:</span><span id="detailIdType" class="info-val">-</span></div>
+                <div class="info-row"><span class="info-label">आईडी नंबर:</span><span id="detailIdNumber" class="info-val">-</span></div>
+            </div>
+            <p class="submodal-note"><i class="fa-solid fa-circle-info"></i> भविष्य में प्रोफाइल एडिट करने का विकल्प यहां सक्रिय होगा।</p>
+        </div>
+    </div>
+
+    <!-- SUBMODAL 2: KYC Details View -->
+    <div id="kycDetailsModal" class="submodal-overlay" onclick="closeSubmodal('kycDetailsModal', event)">
+        <div class="submodal-card" onclick="event.stopPropagation()">
+            <div class="submodal-header">
+                <h3><i class="fa-solid fa-id-card" style="color: #059669;"></i> केवाईसी एवं दस्तावेज़</h3>
+                <button type="button" class="submodal-close-btn" onclick="closeSubmodal('kycDetailsModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="submodal-body">
+                <div class="info-row"><span class="info-label">दस्तावेज़ प्रकार:</span><span id="kycDocType" class="info-val">आधार कार्ड / पैन</span></div>
+                <div class="info-row"><span class="info-label">दस्तावेज़ संख्या:</span><span id="kycDocNum" class="info-val">XXXX-XXXX-8921</span></div>
+                <div class="info-row"><span class="info-label">सत्यापन स्थिति:</span><span id="kycStatusBadge" class="info-val" style="color: #059669; font-weight: 800;">✓ सत्यापित</span></div>
+                <div class="info-row"><span class="info-label">सत्यापन स्तर:</span><span class="info-val">एडमिन स्वीकृत (Level 1)</span></div>
+            </div>
+            <p class="submodal-note"><i class="fa-solid fa-shield-halved"></i> आपके सभी दस्तावेज़ एन्क्रिप्टेड और सुरक्षित हैं।</p>
+        </div>
+    </div>
+
+    <!-- SUBMODAL 3: Settings & Support View -->
+    <div id="supportDetailsModal" class="submodal-overlay" onclick="closeSubmodal('supportDetailsModal', event)">
+        <div class="submodal-card" onclick="event.stopPropagation()">
+            <div class="submodal-header">
+                <h3><i class="fa-solid fa-headset" style="color: #2563eb;"></i> सेटिंग्स एवं 24x7 सहायता</h3>
+                <button type="button" class="submodal-close-btn" onclick="closeSubmodal('supportDetailsModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="submodal-body">
+                <div class="support-card-box">
+                    <h4>पार्टनर टोल-फ्री हेल्पलाइन</h4>
+                    <p style="font-size: 1.15rem; font-weight: 800; color: var(--brand-orange); margin: 6px 0;">
+                        <i class="fa-solid fa-phone"></i> 1800-889-CLAP (2527)
+                    </p>
+                    <p style="font-size: 0.78rem; color: #6b7280;">सोमवार - रविवार (24x7 सेवा)</p>
+                </div>
+                <div class="support-card-box" style="margin-top: 10px;">
+                    <h4>व्हाट्सएप एवं ईमेल सहायता</h4>
+                    <p style="font-size: 0.86rem; color: #374151; margin-top: 4px;">
+                        <i class="fa-brands fa-whatsapp" style="color: #22c55e;"></i> +91 98765 43210<br>
+                        <i class="fa-solid fa-envelope" style="color: var(--brand-orange);"></i> partner@cooperativeclap.com
+                    </p>
+                </div>
+            </div>
+            <p class="submodal-note"><i class="fa-solid fa-gear"></i> भाषा व ऐप नोटिफिकेशन सेटिंग्स जल्द उपलब्ध होंगी।</p>
+        </div>
     </div>
 
     <!-- Toast Notification Message Box -->
