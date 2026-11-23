@@ -156,28 +156,6 @@ $admin = $_SESSION['admin_user'];
         .nav-item.active .nav-badge {
             background: rgba(0, 0, 0, 0.2);
         }
-        .sidebar-btn-add {
-            width: 100%;
-            background: rgba(255, 94, 0, 0.15);
-            border: 1px dashed var(--primary);
-            color: #FFA566;
-            padding: 10px 14px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            margin-top: 10px;
-            transition: all 0.2s;
-        }
-        .sidebar-btn-add:hover {
-            background: var(--primary);
-            color: white;
-            border-style: solid;
-        }
 
         .sidebar-user {
             padding: 16px;
@@ -658,12 +636,6 @@ $admin = $_SESSION['admin_user'];
                     <span class="nav-badge" id="side-count-categories">0</span>
                 </button>
 
-                <!-- Direct Add Category Option in Sidebar -->
-                <button class="sidebar-btn-add" onclick="openAddCategoryModal()">
-                    <span>➕</span>
-                    <span>Add New Category</span>
-                </button>
-
                 <div class="menu-label" style="margin-top: 20px;">APPS ECOSYSTEM</div>
                 
                 <div class="nav-item" style="opacity: 0.8; cursor: default;">
@@ -711,11 +683,6 @@ $admin = $_SESSION['admin_user'];
             <div class="page-title">
                 <h2 id="header-title">Service Provider Approvals</h2>
                 <p id="header-desc">Review and manage partner verification status across the platform</p>
-            </div>
-            <div class="header-actions">
-                <button class="btn-action-primary" id="btn-header-add-cat" style="display: none;" onclick="openAddCategoryModal()">
-                    ➕ Add New Category
-                </button>
             </div>
         </header>
 
@@ -862,7 +829,6 @@ $admin = $_SESSION['admin_user'];
             const btnCategories = document.getElementById('side-btn-categories');
             const headerTitle = document.getElementById('header-title');
             const headerDesc = document.getElementById('header-desc');
-            const headerAddBtn = document.getElementById('btn-header-add-cat');
 
             if (section === 'providers') {
                 viewProviders.style.display = 'block';
@@ -871,7 +837,6 @@ $admin = $_SESSION['admin_user'];
                 btnCategories.classList.remove('active');
                 headerTitle.innerText = 'Service Provider Approvals';
                 headerDesc.innerText = 'Review and manage partner verification status across the platform';
-                headerAddBtn.style.display = 'none';
             } else {
                 viewProviders.style.display = 'none';
                 viewCategories.style.display = 'block';
@@ -879,7 +844,6 @@ $admin = $_SESSION['admin_user'];
                 btnCategories.classList.add('active');
                 headerTitle.innerText = 'Service Categories Management';
                 headerDesc.innerText = 'Manage master categories that feed all apps in the ecosystem';
-                headerAddBtn.style.display = 'inline-flex';
                 loadCategories();
             }
         }
