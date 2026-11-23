@@ -111,7 +111,29 @@ class Provider {
 
     public function getCategories(): array {
         $result = $this->db->query("SELECT * FROM categories WHERE status = 1 ORDER BY id ASC");
-        return $result->fetch_all(MYSQLI_ASSOC);
+        return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+    }
+
+    public function getAllCategoriesAdmin(): array {
+        $result = $this->db->query("SELECT * FROM categories ORDER BY id DESC");
+        return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+    }
+
+    public function addCategory(string $name, string $icon = 'fa-solid fa-wrench', ?string $description = null): int {
+        $stmt = $this->db->prepare("INSERT INTO categories (name, icon, description, status) VALUES (?, ?, ?, 1)");
+        $stmt->bind_param("sss", $name, $icon, $description);
+        $stmt->execute();
+        $newId = (int)$this->db->insert_id;
+        $stmt->close();
+        return $newId;
+    }
+
+    public function deleteCategory(int $id): bool {
+        $stmt = $this->db->prepare("DELETE FROM categories WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $success = $stmt->execute();
+        $stmt->close();
+        return $success;
     }
 
     public function getAll(?string $status = null): array {

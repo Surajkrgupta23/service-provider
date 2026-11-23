@@ -161,4 +161,58 @@ class ProviderController {
             'providers' => $providers
         ]);
     }
+
+    /**
+     * List all categories for Admin
+     * GET /api/admin/categories
+     */
+    public function listCategoriesAdmin(): void {
+        $categories = $this->providerModel->getAllCategoriesAdmin();
+        Response::success('Categories loaded successfully', [
+            'total'      => count($categories),
+            'categories' => $categories
+        ]);
+    }
+
+    /**
+     * Add new category by Admin
+     * POST /api/admin/add-category
+     */
+    public function addCategory(array $input): void {
+        $name = trim($input['name'] ?? '');
+        $icon = trim($input['icon'] ?? 'fa-solid fa-wrench');
+        $description = trim($input['description'] ?? '');
+
+        if (empty($name)) {
+            Response::validationError(['name' => ['Category name is required.']]);
+            return;
+        }
+
+        try {
+            $newId = $this->providerModel->addCategory($name, $icon, $description);
+            Response::success('Category created successfully', [
+                'id'          => $newId,
+                'name'        => $name,
+                'icon'        => $icon,
+                'description' => $description
+            ], 201);
+        } catch (Throwable $e) {
+            Response::error('Failed to create category: ' . $e->getMessage(), null, 400);
+        }
+    }
+
+    /**
+     * Delete category by Admin
+     * POST /api/admin/delete-category
+     */
+    public function deleteCategory(array $input): void {
+        $id = (int)($input['id'] ?? 0);
+        if ($id <= 0) {
+            Response::error('Invalid Category ID', null, 400);
+            return;
+        }
+
+        $this->providerModel->deleteCategory($id);
+        Response::success('Category deleted successfully', ['id' => $id]);
+    }
 }

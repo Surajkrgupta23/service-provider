@@ -114,6 +114,30 @@ try {
             }
             break;
 
+        case 'admin-list-categories':
+            if ($method === 'GET' || $method === 'POST') {
+                $providerController->listCategoriesAdmin();
+            } else {
+                Response::error('Method not allowed', null, 405);
+            }
+            break;
+
+        case 'admin-add-category':
+            if ($method === 'POST') {
+                $providerController->addCategory($inputData);
+            } else {
+                Response::error('Method not allowed', null, 405);
+            }
+            break;
+
+        case 'admin-delete-category':
+            if ($method === 'POST') {
+                $providerController->deleteCategory($inputData);
+            } else {
+                Response::error('Method not allowed', null, 405);
+            }
+            break;
+
         default:
             Response::error("Invalid API endpoint: action='{$action}'", null, 404);
             break;

@@ -2,7 +2,7 @@
 /**
  * Cooperative Clap - Central Web Admin Portal
  * Path: backend/admin/index.php
- * Handles Service Provider verification, KYC review, and ecosystem controls.
+ * Handles Service Provider verification, Category Management, and ecosystem controls.
  */
 
 declare(strict_types=1);
@@ -33,6 +33,7 @@ $admin = $_SESSION['admin_user'];
             --dark: #1E293B;
             --gray-100: #F8FAFC;
             --gray-200: #E2E8F0;
+            --gray-400: #94A3B8;
             --gray-500: #64748B;
             --white: #FFFFFF;
         }
@@ -50,7 +51,7 @@ $admin = $_SESSION['admin_user'];
         header {
             background: var(--white);
             border-bottom: 1px solid var(--gray-200);
-            padding: 16px 32px;
+            padding: 14px 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -93,16 +94,79 @@ $admin = $_SESSION['admin_user'];
             font-size: 13px;
             font-weight: 600;
         }
+
+        /* Top Navigation Bar */
+        .top-nav-bar {
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0 32px;
+        }
+        .nav-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+        }
+        .nav-link {
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 14px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-500);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-link:hover {
+            color: var(--primary);
+        }
+        .nav-link.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .nav-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(255, 94, 0, 0.2);
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
         main {
             max-width: 1300px;
-            margin: 32px auto;
+            margin: 28px auto;
             padding: 0 24px;
         }
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 20px;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
         }
         .stat-card {
             background: var(--white);
@@ -260,6 +324,10 @@ $admin = $_SESSION['admin_user'];
             background: #FEE2E2;
             color: #991B1B;
         }
+        .badge.active {
+            background: #D1FAE5;
+            color: #065F46;
+        }
         .skills-chips {
             display: flex;
             flex-wrap: wrap;
@@ -305,6 +373,15 @@ $admin = $_SESSION['admin_user'];
         .btn-reject:hover {
             background: #DC2626;
         }
+        .btn-delete {
+            background: #FEE2E2;
+            color: #991B1B;
+            border: 1px solid #FECACA;
+        }
+        .btn-delete:hover {
+            background: #EF4444;
+            color: white;
+        }
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -328,6 +405,90 @@ $admin = $_SESSION['admin_user'];
             from { transform: translateY(20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(2px);
+        }
+        .modal {
+            background: var(--white);
+            border-radius: 18px;
+            width: 100%;
+            max-width: 480px;
+            padding: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: modalFadeIn 0.25s ease;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h3 {
+            font-size: 18px;
+            color: var(--dark);
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--gray-500);
+        }
+        .modal-group {
+            margin-bottom: 16px;
+        }
+        .modal-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+        .modal-input, .modal-textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .modal-input:focus, .modal-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 94, 0, 0.12);
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 24px;
+        }
+        .btn-cancel {
+            background: var(--gray-100);
+            border: 1px solid var(--gray-200);
+            color: var(--dark);
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -346,78 +507,188 @@ $admin = $_SESSION['admin_user'];
         </div>
     </header>
 
+    <!-- Navigation Bar with Tabs & Add Category Option -->
+    <div class="top-nav-bar">
+        <div class="nav-container">
+            <div class="nav-tabs">
+                <button class="nav-link active" id="tab-btn-providers" onclick="switchSection('providers')">
+                    👥 Service Providers (<span id="tab-count-providers">0</span>)
+                </button>
+                <button class="nav-link" id="tab-btn-categories" onclick="switchSection('categories')">
+                    🏷️ Categories Management (<span id="tab-count-categories">0</span>)
+                </button>
+            </div>
+            <div class="nav-actions">
+                <button class="btn-primary" onclick="openAddCategoryModal()">
+                    ➕ Add New Category
+                </button>
+            </div>
+        </div>
+    </div>
+
     <main>
-        <!-- Stats Section -->
-        <div class="stats-grid">
-            <div class="stat-card all">
-                <div class="stat-title">Total Registered Providers</div>
-                <div class="stat-value" id="count-all">0</div>
+        <!-- ================= SECTION 1: SERVICE PROVIDERS ================= -->
+        <div id="section-providers">
+            <!-- Stats Section -->
+            <div class="stats-grid">
+                <div class="stat-card all">
+                    <div class="stat-title">Total Registered Providers</div>
+                    <div class="stat-value" id="count-all">0</div>
+                </div>
+                <div class="stat-card pending">
+                    <div class="stat-title">Pending Verification</div>
+                    <div class="stat-value" id="count-pending" style="color: var(--warning);">0</div>
+                </div>
+                <div class="stat-card verified">
+                    <div class="stat-title">Approved & Verified</div>
+                    <div class="stat-value" id="count-verified" style="color: var(--success);">0</div>
+                </div>
+                <div class="stat-card rejected">
+                    <div class="stat-title">Rejected Applications</div>
+                    <div class="stat-value" id="count-rejected" style="color: var(--danger);">0</div>
+                </div>
             </div>
-            <div class="stat-card pending">
-                <div class="stat-title">Pending Verification</div>
-                <div class="stat-value" id="count-pending" style="color: var(--warning);">0</div>
-            </div>
-            <div class="stat-card verified">
-                <div class="stat-title">Approved & Verified</div>
-                <div class="stat-value" id="count-verified" style="color: var(--success);">0</div>
-            </div>
-            <div class="stat-card rejected">
-                <div class="stat-title">Rejected Applications</div>
-                <div class="stat-value" id="count-rejected" style="color: var(--danger);">0</div>
+
+            <!-- Providers List Section -->
+            <div class="content-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <h2>Service Provider Approvals</h2>
+                        <p>Manage verification status for all partner applications</p>
+                    </div>
+                    <div class="filters">
+                        <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+                        <button class="filter-btn" onclick="setFilter('pending_verification', this)">Pending Review</button>
+                        <button class="filter-btn" onclick="setFilter('verified', this)">Verified</button>
+                        <button class="filter-btn" onclick="setFilter('rejected', this)">Rejected</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Provider</th>
+                                <th>Phone / Email</th>
+                                <th>Selected Categories</th>
+                                <th>City / Area</th>
+                                <th>Status</th>
+                                <th>Registered On</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="providers-table-body">
+                            <tr>
+                                <td colspan="7" class="empty-state">Loading partner applications...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- Providers List Section -->
-        <div class="content-card">
-            <div class="card-header">
-                <div class="card-title">
-                    <h2>Service Provider Approvals</h2>
-                    <p>Manage verification status for all partner applications</p>
+        <!-- ================= SECTION 2: CATEGORIES MANAGEMENT ================= -->
+        <div id="section-categories" style="display: none;">
+            <div class="content-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <h2>Master Service Categories</h2>
+                        <p>These categories populate the registration skill selection across all 3 apps</p>
+                    </div>
+                    <button class="btn-primary" onclick="openAddCategoryModal()">
+                        ➕ Add New Category
+                    </button>
                 </div>
-                <div class="filters">
-                    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
-                    <button class="filter-btn" onclick="setFilter('pending_verification', this)">Pending Review</button>
-                    <button class="filter-btn" onclick="setFilter('verified', this)">Verified</button>
-                    <button class="filter-btn" onclick="setFilter('rejected', this)">Rejected</button>
-                </div>
-            </div>
 
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Provider</th>
-                            <th>Phone / Email</th>
-                            <th>Selected Categories</th>
-                            <th>City / Area</th>
-                            <th>Status</th>
-                            <th>Registered On</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="providers-table-body">
-                        <tr>
-                            <td colspan="7" class="empty-state">Loading partner applications...</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Icon</th>
+                                <th>Category Name</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Created Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categories-table-body">
+                            <tr>
+                                <td colspan="7" class="empty-state">Loading categories...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
+
+    <!-- Modal: Add New Category -->
+    <div id="category-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>➕ Add New Service Category</h3>
+                <button class="modal-close" onclick="closeAddCategoryModal()">&times;</button>
+            </div>
+            <form onsubmit="submitNewCategory(event)">
+                <div class="modal-group">
+                    <label for="cat-name">Category Name *</label>
+                    <input type="text" id="cat-name" class="modal-input" placeholder="e.g. Pest Control, Car Wash" required>
+                </div>
+                <div class="modal-group">
+                    <label for="cat-icon">Category Icon (Emoji / Text) *</label>
+                    <input type="text" id="cat-icon" class="modal-input" placeholder="e.g. 🛠️, ⚡, 🪠, 🚗, 🧹, ✂️" value="🛠️" required>
+                </div>
+                <div class="modal-group">
+                    <label for="cat-desc">Short Description</label>
+                    <textarea id="cat-desc" class="modal-textarea" rows="2" placeholder="Brief details about services under this category"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeAddCategoryModal()">Cancel</button>
+                    <button type="submit" class="btn-primary" id="btn-save-cat">Save Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <div id="toast" class="toast"></div>
 
     <script>
         const API_URL = '../api/index.php';
         let allProviders = [];
+        let allCategories = [];
         let currentFilter = 'all';
 
+        // Tab Switching
+        function switchSection(section) {
+            const secProviders = document.getElementById('section-providers');
+            const secCategories = document.getElementById('section-categories');
+            const btnProviders = document.getElementById('tab-btn-providers');
+            const btnCategories = document.getElementById('tab-btn-categories');
+
+            if (section === 'providers') {
+                secProviders.style.display = 'block';
+                secCategories.style.display = 'none';
+                btnProviders.classList.add('active');
+                btnCategories.classList.remove('active');
+            } else {
+                secProviders.style.display = 'none';
+                secCategories.style.display = 'block';
+                btnProviders.classList.remove('active');
+                btnCategories.classList.add('active');
+                loadCategories();
+            }
+        }
+
+        // ================= PROVIDERS =================
         async function loadProviders() {
             try {
                 const res = await fetch(`${API_URL}?action=admin-list-providers`);
                 const result = await res.json();
                 if (result.success) {
                     allProviders = result.data.providers || [];
+                    document.getElementById('tab-count-providers').innerText = allProviders.length;
                     updateStats();
                     renderTable();
                 } else {
@@ -464,7 +735,7 @@ $admin = $_SESSION['admin_user'];
 
             tbody.innerHTML = filtered.map(p => {
                 const initial = p.name ? p.name.charAt(0).toUpperCase() : 'P';
-                const skills = p.category ? p.category.split(',').map(s => `<span class="chip">${s.trim()}</span>`).join('') : '<span class="chip">General</span>';
+                const skills = p.category ? p.category.split(',').map(s => `<span class="chip">${escapeHtml(s.trim())}</span>`).join('') : '<span class="chip">General</span>';
                 const status = p.verification_status || 'pending_verification';
                 const formattedDate = p.created_at ? p.created_at.split(' ')[0] : '-';
 
@@ -527,7 +798,6 @@ $admin = $_SESSION['admin_user'];
                 const data = await res.json();
                 if (data.success) {
                     showToast(`Partner #${providerId} status updated to ${newStatus.toUpperCase()}`);
-                    // Refresh data
                     loadProviders();
                 } else {
                     showToast('Failed: ' + data.message);
@@ -535,6 +805,131 @@ $admin = $_SESSION['admin_user'];
             } catch (err) {
                 console.error(err);
                 showToast('Error updating status.');
+            }
+        }
+
+        // ================= CATEGORIES =================
+        async function loadCategories() {
+            try {
+                const res = await fetch(`${API_URL}?action=admin-list-categories`);
+                const result = await res.json();
+                if (result.success) {
+                    allCategories = result.data.categories || [];
+                    document.getElementById('tab-count-categories').innerText = allCategories.length;
+                    renderCategoriesTable();
+                } else {
+                    showToast('Failed to load categories: ' + result.message);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error loading categories.');
+            }
+        }
+
+        function renderCategoriesTable() {
+            const tbody = document.getElementById('categories-table-body');
+            if (allCategories.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No categories found. Click "+ Add New Category" to create one.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = allCategories.map(cat => {
+                const iconDisplay = cat.icon && !cat.icon.startsWith('fa-') ? cat.icon : '🛠️';
+                const createdDate = cat.created_at ? cat.created_at.split(' ')[0] : '-';
+                return `
+                    <tr>
+                        <td><strong>#${cat.id}</strong></td>
+                        <td style="font-size: 20px;">${escapeHtml(iconDisplay)}</td>
+                        <td><strong>${escapeHtml(cat.name)}</strong></td>
+                        <td style="color: var(--gray-500);">${escapeHtml(cat.description || '-')}</td>
+                        <td><span class="badge active">Active</span></td>
+                        <td>${createdDate}</td>
+                        <td>
+                            <button class="btn btn-delete" onclick="deleteCategory(${cat.id}, '${escapeHtml(cat.name)}')">🗑️ Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openAddCategoryModal() {
+            document.getElementById('category-modal').style.display = 'flex';
+            document.getElementById('cat-name').value = '';
+            document.getElementById('cat-desc').value = '';
+            document.getElementById('cat-name').focus();
+        }
+
+        function closeAddCategoryModal() {
+            document.getElementById('category-modal').style.display = 'none';
+        }
+
+        async function submitNewCategory(e) {
+            e.preventDefault();
+            const name = document.getElementById('cat-name').value.trim();
+            const icon = document.getElementById('cat-icon').value.trim() || '🛠️';
+            const desc = document.getElementById('cat-desc').value.trim();
+
+            if (!name) {
+                alert('Please enter category name');
+                return;
+            }
+
+            const btn = document.getElementById('btn-save-cat');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+
+            try {
+                const res = await fetch(`${API_URL}?action=admin-add-category`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        icon: icon,
+                        description: desc
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`Category "${name}" added successfully! 🎉`);
+                    closeAddCategoryModal();
+                    loadCategories();
+                    // Switch to categories tab if not already on it
+                    switchSection('categories');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Network error while saving category.');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Save Category';
+            }
+        }
+
+        async function deleteCategory(id, name) {
+            if (!confirm(`Are you sure you want to delete category "${name}"?`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}?action=admin-delete-category`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`Category "${name}" deleted.`);
+                    loadCategories();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Network error deleting category.');
             }
         }
 
@@ -560,6 +955,7 @@ $admin = $_SESSION['admin_user'];
 
         // Initialize on load
         loadProviders();
+        loadCategories();
     </script>
 </body>
 </html>
