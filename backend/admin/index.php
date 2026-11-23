@@ -4,6 +4,17 @@
  * Path: backend/admin/index.php
  * Handles Service Provider verification, KYC review, and ecosystem controls.
  */
+
+declare(strict_types=1);
+session_start();
+
+// Enforce Admin Authentication
+if (!isset($_SESSION['admin_user'])) {
+    header('Location: login.php');
+    exit;
+}
+
+$admin = $_SESSION['admin_user'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -329,7 +340,10 @@
                 <p>Central Admin Portal (Ecosystem Control)</p>
             </div>
         </div>
-        <div class="admin-badge">Admin Mode Active</div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <div class="admin-badge">👤 <?= htmlspecialchars($admin['name']) ?> (@<?= htmlspecialchars($admin['username']) ?>)</div>
+            <a href="logout.php" style="color: #EF4444; text-decoration: none; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 8px; border: 1px solid #FECACA; background: #FEF2F2; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">Logout 🚪</a>
+        </div>
     </header>
 
     <main>
