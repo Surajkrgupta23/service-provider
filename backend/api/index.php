@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once __DIR__ . '/../app/Helpers/Response.php';
 require_once __DIR__ . '/../app/Controllers/AuthController.php';
 require_once __DIR__ . '/../app/Controllers/ProviderController.php';
+require_once __DIR__ . '/../app/Controllers/AdminController.php';
 
 // Parse JSON payload or multipart form data
 $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
@@ -39,6 +40,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 $authController     = new AuthController();
 $providerController = new ProviderController();
+$adminController    = new AdminController();
 
 try {
     switch ($action) {
@@ -98,9 +100,10 @@ try {
             }
             break;
 
+        // ================= ADMIN OPERATIONS (AdminController) =================
         case 'admin-update-status':
             if ($method === 'POST') {
-                $providerController->updateStatus($inputData);
+                $adminController->updateProviderStatus($inputData);
             } else {
                 Response::error('Method not allowed', null, 405);
             }
@@ -108,7 +111,7 @@ try {
 
         case 'admin-list-providers':
             if ($method === 'GET' || $method === 'POST') {
-                $providerController->listProviders();
+                $adminController->listProviders();
             } else {
                 Response::error('Method not allowed', null, 405);
             }
@@ -116,7 +119,7 @@ try {
 
         case 'admin-list-categories':
             if ($method === 'GET' || $method === 'POST') {
-                $providerController->listCategoriesAdmin();
+                $adminController->listCategories();
             } else {
                 Response::error('Method not allowed', null, 405);
             }
@@ -124,7 +127,7 @@ try {
 
         case 'admin-add-category':
             if ($method === 'POST') {
-                $providerController->addCategory($inputData);
+                $adminController->addCategory($inputData);
             } else {
                 Response::error('Method not allowed', null, 405);
             }
@@ -132,7 +135,7 @@ try {
 
         case 'admin-delete-category':
             if ($method === 'POST') {
-                $providerController->deleteCategory($inputData);
+                $adminController->deleteCategory($inputData);
             } else {
                 Response::error('Method not allowed', null, 405);
             }
