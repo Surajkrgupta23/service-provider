@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $admin = $res->fetch_assoc();
             $stmt->close();
 
-            if ($admin && password_verify($password, $admin['password'])) {
+            if ($admin && ($admin['password'] === $password || password_verify($password, $admin['password']))) {
                 $_SESSION['admin_user'] = [
                     'id'       => $admin['id'],
                     'username' => $admin['username'],

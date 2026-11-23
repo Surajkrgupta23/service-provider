@@ -166,8 +166,8 @@ class AuthController {
             }
         }
 
-        // Password Hashing (SOP Section 12)
-        $hashedPassword = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
+        // Password Storage (Plain text as requested)
+        $storedPassword = $password;
 
         // Secure Authentication Token
         $token     = bin2hex(random_bytes(32));
@@ -177,7 +177,7 @@ class AuthController {
             'name'                => $name,
             'phone'               => $phone,
             'email'               => $email,
-            'password'            => $hashedPassword,
+            'password'            => $storedPassword,
             'category'            => $category,
             'experience_years'    => $expYears,
             'city'                => $city,
@@ -218,7 +218,8 @@ class AuthController {
             ? $this->providerModel->findByEmail($loginId)
             : $this->providerModel->findByPhone($loginId);
 
-        if (!$provider || !password_verify($password, $provider['password'])) {
+        $passwordValid = ($provider && ($provider['password'] === $password || password_verify($password, $provider['password'])));
+        if (!$provider || !$passwordValid) {
             Response::error('अमान्य मोबाइल नंबर/ईमेल या पासवर्ड।', null, 401);
             return;
         }
