@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/api_endpoints.dart';
@@ -45,6 +46,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _loadingBlocks = false;
   bool _loadingPacs = false;
 
+  Map<String, dynamic>? _parseMap(dynamic data) {
+    if (data == null) return null;
+    if (data is Map<String, dynamic>) return data;
+    if (data is Map) return Map<String, dynamic>.from(data);
+    if (data is String) {
+      try {
+        final decoded = jsonDecode(data);
+        if (decoded is Map<String, dynamic>) return decoded;
+        if (decoded is Map) return Map<String, dynamic>.from(decoded);
+      } catch (_) {}
+    }
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -62,10 +77,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       queryParameters: {'action': ApiEndpoints.categories},
     );
     if (!mounted) return;
-    if (response.data != null && response.data['success'] == true) {
-      final List raw = response.data['data'] ?? [];
+    final map = _parseMap(response.data);
+    if (map != null && map['success'] == true) {
+      final List raw = map['data'] ?? [];
       setState(() {
-        _allCategories = raw.map((item) => Map<String, dynamic>.from(item)).toList();
+        _allCategories = raw.map((item) => Map<String, dynamic>.from(item as Map)).toList();
         _isLoadingCategories = false;
         if (_allCategories.isNotEmpty && _selectedCategories.isEmpty) {
           _selectedCategories = [_allCategories.first['name'].toString()];
@@ -73,7 +89,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       });
     } else {
       setState(() => _isLoadingCategories = false);
-      final msg = response.data?['message'] ?? 'श्रेणियां लोड करने में त्रुटि';
+      final msg = map?['message'] ?? 'श्रेणियां लोड करने में त्रुटि';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg.toString())),
       );
@@ -88,13 +104,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
       queryParameters: {'action': ApiEndpoints.districts},
     );
     if (!mounted) return;
-    setState(() => _loadingDistricts = false);
-    if (response.data != null && response.data['success'] == true) {
-      final List raw = response.data['data'] ?? [];
-      setState(() {
-        _districts = raw.map((item) => Map<String, dynamic>.from(item)).toList();
-      });
-    }
+    final map = _parseMap(response.data);
+    setState(() {
+      _loadingDistricts = false;
+      if (map != null && map['success'] == true) {
+        final List raw = map['data'] ?? [];
+        _districts = raw.map((item) => Map<String, dynamic>.from(item as Map)).toList();
+      }
+    });
   }
 
   // On District Changed
@@ -115,13 +132,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _pacsList = [];
       _loadingTehseels = true;
       _loadingBlocks = true;
-      _loadingPacs = true;
+      _loadingPacs = false;
       if (_cityController.text.trim().isEmpty) {
         _cityController.text = _selectedDistrictName ?? '';
       }
     });
 
-    // Fetch Tehseels, Blocks, and PACS concurrently
+    // Fetch Tehseels and Blocks for this District
     final tehseelsRes = await ApiClient.dio.get('', queryParameters: {
       'action': ApiEndpoints.tehseels,
       'district_id': distId,
@@ -130,28 +147,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
       'action': ApiEndpoints.blocks,
       'district_id': distId,
     });
-    final pacsRes = await ApiClient.dio.get('', queryParameters: {
-      'action': ApiEndpoints.pacs,
-      'district_id': distId,
-    });
 
     if (!mounted) return;
+    final tehMap = _parseMap(tehseelsRes.data);
+    final blkMap = _parseMap(blocksRes.data);
     setState(() {
       _loadingTehseels = false;
       _loadingBlocks = false;
-      _loadingPacs = false;
 
-      if (tehseelsRes.data != null && tehseelsRes.data['success'] == true) {
-        final List raw = tehseelsRes.data['data'] ?? [];
-        _tehseels = raw.map((item) => Map<String, dynamic>.from(item)).toList();
+      if (tehMap != null && tehMap['success'] == true) {
+        final List raw = tehMap['data'] ?? [];
+        _tehseels = raw.map((item) => Map<String, dynamic>.from(item as Map)).toList();
       }
-      if (blocksRes.data != null && blocksRes.data['success'] == true) {
-        final List raw = blocksRes.data['data'] ?? [];
-        _blocks = raw.map((item) => Map<String, dynamic>.from(item)).toList();
-      }
-      if (pacsRes.data != null && pacsRes.data['success'] == true) {
-        final List raw = pacsRes.data['data'] ?? [];
-        _pacsList = raw.map((item) => Map<String, dynamic>.from(item)).toList();
+      if (blkMap != null && blkMap['success'] == true) {
+        final List raw = blkMap['data'] ?? [];
+        _blocks = raw.map((item) => Map<String, dynamic>.from(item as Map)).toList();
       }
     });
   }
@@ -168,7 +178,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _selectedPacsId = null;
       _selectedPacsName = null;
       _loadingBlocks = true;
-      _loadingPacs = true;
+      _loadingPacs = false;
     });
 
     final blocksRes = await ApiClient.dio.get('', queryParameters: {
@@ -176,28 +186,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
       'district_id': _selectedDistrictId,
       'tehseel_id': tehId,
     });
-    final pacsRes = await ApiClient.dio.get('', queryParameters: {
-      'action': ApiEndpoints.pacs,
-      'district_id': _selectedDistrictId,
-      'tehseel_id': tehId,
-    });
 
     if (!mounted) return;
+    final blkMap = _parseMap(blocksRes.data);
     setState(() {
       _loadingBlocks = false;
-      _loadingPacs = false;
-      if (blocksRes.data != null && blocksRes.data['success'] == true) {
-        final List raw = blocksRes.data['data'] ?? [];
-        _blocks = raw.map((item) => Map<String, dynamic>.from(item)).toList();
-      }
-      if (pacsRes.data != null && pacsRes.data['success'] == true) {
-        final List raw = pacsRes.data['data'] ?? [];
-        _pacsList = raw.map((item) => Map<String, dynamic>.from(item)).toList();
+      if (blkMap != null && blkMap['success'] == true) {
+        final List raw = blkMap['data'] ?? [];
+        _blocks = raw.map((item) => Map<String, dynamic>.from(item as Map)).toList();
       }
     });
   }
 
-  // On Block Changed
+  // On Block Changed - loads PACS for selected block
   Future<void> _onBlockChanged(String? blkId) async {
     if (blkId == null) return;
     final blk = _blocks.firstWhere((b) => b['id'].toString() == blkId, orElse: () => {});
@@ -206,6 +207,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _selectedBlockName = blk['name']?.toString() ?? '';
       _selectedPacsId = null;
       _selectedPacsName = null;
+      _pacsList = [];
       _loadingPacs = true;
       if (_selectedDistrictName != null && _selectedDistrictName!.isNotEmpty) {
         _cityController.text = '${_selectedDistrictName!} - ${_selectedBlockName!}';
@@ -219,11 +221,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     if (!mounted) return;
+    final pacsMap = _parseMap(pacsRes.data);
     setState(() {
       _loadingPacs = false;
-      if (pacsRes.data != null && pacsRes.data['success'] == true) {
-        final List raw = pacsRes.data['data'] ?? [];
-        _pacsList = raw.map((item) => Map<String, dynamic>.from(item)).toList();
+      if (pacsMap != null && pacsMap['success'] == true) {
+        final List raw = pacsMap['data'] ?? [];
+        _pacsList = raw.map((item) => Map<String, dynamic>.from(item as Map)).toList();
       }
     });
   }
@@ -465,7 +468,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    final data = response.data;
+    final data = _parseMap(response.data);
     if (data != null && data['success'] == true) {
       final token = data['data']['auth_token'];
       await ApiClient.saveToken(token);

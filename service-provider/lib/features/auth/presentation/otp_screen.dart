@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/api_endpoints.dart';
-import '../../../core/config/app_config.dart';
 import '../../../core/network/api_client.dart';
 import '../../dashboard/presentation/dashboard_screen.dart';
 import '../../verification/presentation/pending_screen.dart';
