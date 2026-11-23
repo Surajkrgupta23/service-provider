@@ -60,30 +60,40 @@ class Provider {
         $sql = "INSERT INTO providers (
             name, phone, email, password, category, experience_years, 
             city, id_type, id_number, id_document, verification_status, 
-            auth_token, token_expires_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            auth_token, token_expires_at,
+            district_id, district_name, tehseel_id, tehseel_name, block_id, block_name, pacs_id, pacs_name
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->db->prepare($sql);
         
-        $name        = $data['name'];
-        $phone       = $data['phone'];
-        $email       = $data['email'];
-        $password    = $data['password'];
-        $category    = $data['category'];
-        $expYears    = (int)($data['experience_years'] ?? 0);
-        $city        = $data['city'];
-        $idType      = $data['id_type'] ?? null;
-        $idNumber    = $data['id_number'] ?? null;
-        $idDocument  = $data['id_document'] ?? null;
-        $status      = $data['verification_status'] ?? 'pending_verification';
-        $authToken   = $data['auth_token'];
-        $expiresAt   = $data['token_expires_at'] ?? null;
+        $name         = $data['name'];
+        $phone        = $data['phone'];
+        $email        = $data['email'];
+        $password     = $data['password'];
+        $category     = $data['category'];
+        $expYears     = (int)($data['experience_years'] ?? 0);
+        $city         = $data['city'];
+        $idType       = $data['id_type'] ?? null;
+        $idNumber     = $data['id_number'] ?? null;
+        $idDocument   = $data['id_document'] ?? null;
+        $status       = $data['verification_status'] ?? 'pending_verification';
+        $authToken    = $data['auth_token'];
+        $expiresAt    = $data['token_expires_at'] ?? null;
+        $districtId   = isset($data['district_id']) && $data['district_id'] !== '' ? (int)$data['district_id'] : null;
+        $districtName = $data['district_name'] ?? null;
+        $tehseelId    = isset($data['tehseel_id']) && $data['tehseel_id'] !== '' ? (int)$data['tehseel_id'] : null;
+        $tehseelName  = $data['tehseel_name'] ?? null;
+        $blockId      = isset($data['block_id']) && $data['block_id'] !== '' ? (int)$data['block_id'] : null;
+        $blockName    = $data['block_name'] ?? null;
+        $pacsId       = isset($data['pacs_id']) && $data['pacs_id'] !== '' ? (int)$data['pacs_id'] : null;
+        $pacsName     = $data['pacs_name'] ?? null;
 
         $stmt->bind_param(
-            "sssssisssssss",
+            "sssssisssssssisisisis",
             $name, $phone, $email, $password, $category, $expYears,
             $city, $idType, $idNumber, $idDocument, $status,
-            $authToken, $expiresAt
+            $authToken, $expiresAt,
+            $districtId, $districtName, $tehseelId, $tehseelName, $blockId, $blockName, $pacsId, $pacsName
         );
 
         $stmt->execute();

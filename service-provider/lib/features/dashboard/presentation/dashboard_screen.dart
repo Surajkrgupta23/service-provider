@@ -24,22 +24,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _fetchDashboard() async {
-    try {
-      final token = await ApiClient.getToken();
-      final response = await ApiClient.dio.get(
-        '',
-        queryParameters: {'action': ApiEndpoints.dashboard},
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
-      );
+    final token = await ApiClient.getToken();
+    final response = await ApiClient.dio.get(
+      '',
+      queryParameters: {'action': ApiEndpoints.dashboard},
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
 
-      if (response.data['success'] == true) {
-        setState(() {
-          _dashData = response.data['data'];
-          _isLoading = false;
-        });
+    if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+      if (response.data != null && response.data['success'] == true) {
+        _dashData = response.data['data'];
       }
-    } catch (e) {
-      setState(() => _isLoading = false);
+    });
+
+    if (response.data == null || response.data['success'] != true) {
+      final msg = response.data?['message'] ?? 'डैशबोर्ड लोड नहीं हो सका';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg.toString())),
+      );
     }
   }
 
@@ -238,7 +242,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    _dashData?['provider']?['name'] ?? 'पार्टनर नाम',
+                                    _dashData?['provider']?['name']?.toString() ?? '',
                                     style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
                                   ),
                                   Text(
@@ -261,11 +265,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       // Stats Row
                       Row(
                         children: [
-                          _buildStatCard('आज की कमाई', '₹0.00'),
+                          _buildStatCard('आज की कमाई', _dashData?['metrics']?['today_earnings']?.toString() ?? '₹0.00'),
                           const SizedBox(width: 10),
-                          _buildStatCard('पूर्ण कार्य', '0'),
+                          _buildStatCard('पूर्ण कार्य', _dashData?['metrics']?['completed_jobs']?.toString() ?? '0'),
                           const SizedBox(width: 10),
-                          _buildStatCard('रेटिंग', '5.0 ★'),
+                          _buildStatCard('रेटिंग', '${_dashData?['metrics']?['rating'] ?? '5.0'} ★'),
                         ],
                       ),
                     ],

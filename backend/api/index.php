@@ -23,6 +23,7 @@ require_once __DIR__ . '/../app/Helpers/Response.php';
 require_once __DIR__ . '/../app/Controllers/AuthController.php';
 require_once __DIR__ . '/../app/Controllers/ProviderController.php';
 require_once __DIR__ . '/../app/Controllers/AdminController.php';
+require_once __DIR__ . '/../app/Models/Location.php';
 
 // Parse JSON payload or multipart form data
 $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
@@ -41,12 +42,58 @@ $method = $_SERVER['REQUEST_METHOD'];
 $authController     = new AuthController();
 $providerController = new ProviderController();
 $adminController    = new AdminController();
+$locationModel      = new Location();
 
 try {
     switch ($action) {
         case 'categories':
             if ($method === 'GET') {
                 $providerController->getCategories();
+            } else {
+                Response::error('Method not allowed', null, 405);
+            }
+            break;
+
+        case 'districts':
+            if ($method === 'GET') {
+                Response::success('Districts loaded', $locationModel->getDistricts());
+            } else {
+                Response::error('Method not allowed', null, 405);
+            }
+            break;
+
+        case 'tehseels':
+            if ($method === 'GET') {
+                $districtId = $_GET['district_id'] ?? null;
+                Response::success('Tehseels loaded', $locationModel->getTehseels($districtId ? (string)$districtId : null));
+            } else {
+                Response::error('Method not allowed', null, 405);
+            }
+            break;
+
+        case 'blocks':
+            if ($method === 'GET') {
+                $districtId = $_GET['district_id'] ?? null;
+                $tehseelId  = $_GET['tehseel_id'] ?? null;
+                Response::success('Blocks loaded', $locationModel->getBlocks(
+                    $districtId ? (string)$districtId : null, 
+                    $tehseelId ? (string)$tehseelId : null
+                ));
+            } else {
+                Response::error('Method not allowed', null, 405);
+            }
+            break;
+
+        case 'pacs':
+            if ($method === 'GET') {
+                $districtId = $_GET['district_id'] ?? null;
+                $blockId    = $_GET['block_id'] ?? null;
+                $tehseelId  = $_GET['tehseel_id'] ?? null;
+                Response::success('PACS loaded', $locationModel->getPacs(
+                    $districtId ? (string)$districtId : null,
+                    $blockId ? (string)$blockId : null,
+                    $tehseelId ? (string)$tehseelId : null
+                ));
             } else {
                 Response::error('Method not allowed', null, 405);
             }

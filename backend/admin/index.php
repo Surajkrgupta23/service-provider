@@ -936,7 +936,11 @@ $admin = $_SESSION['admin_user'];
                             <div style="font-size: 12px; color: var(--gray-500);">${escapeHtml(p.email || '-')}</div>
                         </td>
                         <td><div class="skills-chips">${skills}</div></td>
-                        <td>${escapeHtml(p.city || '-')}</td>
+                        <td>
+                            <div><strong>${escapeHtml(p.city || '-')}</strong></div>
+                            ${p.pacs_name ? `<div style="font-size:11.5px; color:#EA580C; font-weight:700; margin-top:2px;">🏢 ${escapeHtml(p.pacs_name)}</div>` : ''}
+                            ${p.district_name ? `<div style="font-size:11px; color:var(--gray-500);">${escapeHtml(p.district_name)}${p.block_name ? ` • Block: ` + escapeHtml(p.block_name) : ''}</div>` : ''}
+                        </td>
                         <td><span class="badge ${status}">${formatStatus(status)}</span></td>
                         <td>${formattedDate}</td>
                         <td>${actionHtml}</td>

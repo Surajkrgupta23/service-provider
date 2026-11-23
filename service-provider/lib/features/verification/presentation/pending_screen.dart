@@ -26,62 +26,58 @@ class _PendingScreenState extends State<PendingScreen> {
   }
 
   Future<void> _fetchProviderInfo() async {
-    try {
-      final token = await ApiClient.getToken();
-      final response = await ApiClient.dio.get(
-        '',
-        queryParameters: {'action': ApiEndpoints.status},
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
-      );
-      if (response.data['success'] == true) {
-        setState(() {
-          _providerData = response.data['data'];
-        });
-      }
-    } catch (_) {}
+    final token = await ApiClient.getToken();
+    final response = await ApiClient.dio.get(
+      '',
+      queryParameters: {'action': ApiEndpoints.status},
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    if (!mounted) return;
+    if (response.data != null && response.data['success'] == true) {
+      setState(() {
+        _providerData = response.data['data'];
+      });
+    }
   }
 
   Future<void> _checkStatus() async {
     setState(() => _isChecking = true);
-    try {
-      final token = await ApiClient.getToken();
-      final response = await ApiClient.dio.get(
-        '',
-        queryParameters: {'action': ApiEndpoints.status},
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
-      );
+    final token = await ApiClient.getToken();
+    final response = await ApiClient.dio.get(
+      '',
+      queryParameters: {'action': ApiEndpoints.status},
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
 
-      final data = response.data;
-      if (data['success'] == true) {
-        final status = data['data']['verification_status'];
-        if (!mounted) return;
+    if (!mounted) return;
+    setState(() => _isChecking = false);
 
-        if (status == 'verified') {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => const DashboardScreen()),
-            (route) => false,
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('स्थिति: सत्यापन प्रक्रियाधीन (Under Review)')),
-          );
-        }
+    final data = response.data;
+    if (data != null && data['success'] == true) {
+      final status = data['data']['verification_status'];
+      if (status == 'verified') {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const DashboardScreen()),
+          (route) => false,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('स्थिति: सत्यापन प्रक्रियाधीन (Under Review)')),
+        );
       }
-    } catch (e) {
-      if (!mounted) return;
+    } else {
+      final msg = data?['message'] ?? 'स्टेटस जांचने में असमर्थ';
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('स्टेटस जांचने में असमर्थ')),
+        SnackBar(content: Text(msg.toString())),
       );
-    } finally {
-      if (mounted) setState(() => _isChecking = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final name = (_providerData?['name'] as String?) ?? 'पार्टनर';
-    final initial = name.isNotEmpty ? name[0].toUpperCase() : 'P';
+    final name = (_providerData?['name'] as String?) ?? '';
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : '-';
 
     return Scaffold(
       backgroundColor: AppColors.bgCream,

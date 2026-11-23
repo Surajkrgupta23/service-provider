@@ -166,6 +166,16 @@ class AuthController {
             }
         }
 
+        // PACS & Location Fields
+        $districtId   = !empty($input['district_id']) ? $input['district_id'] : null;
+        $districtName = trim((string)($input['district_name'] ?? ''));
+        $tehseelId    = !empty($input['tehseel_id']) ? $input['tehseel_id'] : null;
+        $tehseelName  = trim((string)($input['tehseel_name'] ?? ''));
+        $blockId      = !empty($input['block_id']) ? $input['block_id'] : null;
+        $blockName    = trim((string)($input['block_name'] ?? ''));
+        $pacsId       = !empty($input['pacs_id']) ? $input['pacs_id'] : null;
+        $pacsName     = trim((string)($input['pacs_name'] ?? ''));
+
         // Password Storage (Plain text as requested)
         $storedPassword = $password;
 
@@ -187,6 +197,14 @@ class AuthController {
             'verification_status' => 'pending_verification',
             'auth_token'          => $token,
             'token_expires_at'    => $expiresAt,
+            'district_id'         => $districtId,
+            'district_name'       => $districtName,
+            'tehseel_id'          => $tehseelId,
+            'tehseel_name'        => $tehseelName,
+            'block_id'            => $blockId,
+            'block_name'          => $blockName,
+            'pacs_id'             => $pacsId,
+            'pacs_name'           => $pacsName,
         ]);
 
         $provider = $this->providerModel->findById($providerId);

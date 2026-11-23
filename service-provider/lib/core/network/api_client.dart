@@ -11,6 +11,7 @@ class ApiClient {
         baseUrl: AppConfig.baseUrl,
         connectTimeout: AppConfig.connectTimeout,
         receiveTimeout: AppConfig.receiveTimeout,
+        validateStatus: (status) => true,
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',

@@ -20,16 +20,6 @@ class _OtpScreenState extends State<OtpScreen> {
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
   bool _isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    // Default prefilled test OTP as shown in Figma screenshot (878786)
-    const testOtp = '878786';
-    for (int i = 0; i < 6; i++) {
-      _controllers[i].text = testOtp[i];
-    }
-  }
-
   Future<void> _verifyOtp() async {
     final otp = _controllers.map((c) => c.text).join();
     if (otp.length != 6) {
@@ -40,54 +30,47 @@ class _OtpScreenState extends State<OtpScreen> {
     }
 
     setState(() => _isLoading = true);
-    try {
-      final response = await ApiClient.dio.post(
-        '',
-        queryParameters: {'action': ApiEndpoints.verifyOtp},
-        data: {'phone': widget.phone, 'otp': otp},
-      );
+    final response = await ApiClient.dio.post(
+      '',
+      queryParameters: {'action': ApiEndpoints.verifyOtp},
+      data: {'phone': widget.phone, 'otp': otp},
+    );
 
-      final data = response.data;
-      if (data['success'] == true) {
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    final data = response.data;
+    if (data != null && data['success'] == true) {
+      if (data['data']['needs_registration'] == true) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => RegisterScreen(initialPhone: widget.phone)),
+        );
+      } else {
+        final token = data['data']['auth_token'];
+        final status = data['data']['status'];
+        await ApiClient.saveToken(token);
+
         if (!mounted) return;
-        if (data['data']['needs_registration'] == true) {
-          Navigator.pushReplacement(
+        if (status == 'verified') {
+          Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (_) => RegisterScreen(initialPhone: widget.phone)),
+            MaterialPageRoute(builder: (_) => const DashboardScreen()),
+            (route) => false,
           );
         } else {
-          final token = data['data']['auth_token'];
-          final status = data['data']['status'];
-          await ApiClient.saveToken(token);
-
-          if (!mounted) return;
-          if (status == 'verified') {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const DashboardScreen()),
-              (route) => false,
-            );
-          } else {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => PendingScreen(phone: widget.phone)),
-              (route) => false,
-            );
-          }
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => PendingScreen(phone: widget.phone)),
+            (route) => false,
+          );
         }
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'OTP अमान्य है')),
-        );
       }
-    } catch (e) {
-      if (!mounted) return;
+    } else {
+      final msg = data?['message'] ?? 'OTP अमान्य है';
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('सत्यापन त्रुटि')),
+        SnackBar(content: Text(msg.toString())),
       );
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 

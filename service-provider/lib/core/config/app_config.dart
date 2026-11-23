@@ -18,8 +18,11 @@ class AppConfig {
   /// Dynamically resolves the Base API URL
   static String get baseUrl {
     if (kIsWeb) {
-      // For web: automatically uses the current browser origin (localhost or live domain)
       final origin = Uri.base.origin;
+      // When running on Flutter Web dev server (e.g. localhost:56637), route to Apache port 80
+      if (origin.contains('localhost:') || origin.contains('127.0.0.1:')) {
+        return 'http://localhost$apiPath';
+      }
       return '$origin$apiPath';
     }
     
@@ -32,7 +35,4 @@ class AppConfig {
   // Network timeouts
   static const Duration connectTimeout = Duration(seconds: 15);
   static const Duration receiveTimeout = Duration(seconds: 15);
-
-  // Common UI defaults
-  static const String defaultTestOtp = '878786';
 }

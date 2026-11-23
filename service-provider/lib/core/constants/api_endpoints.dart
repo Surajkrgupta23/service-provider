@@ -2,6 +2,10 @@
 /// Follows SOP Section 9: REST API Standards
 class ApiEndpoints {
   static const String categories   = 'categories';
+  static const String districts    = 'districts';
+  static const String tehseels     = 'tehseels';
+  static const String blocks       = 'blocks';
+  static const String pacs         = 'pacs';
   static const String sendOtp      = 'send-otp';
   static const String verifyOtp    = 'verify-otp';
   static const String register     = 'register';

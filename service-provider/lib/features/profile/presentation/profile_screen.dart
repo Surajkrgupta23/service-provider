@@ -10,16 +10,18 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = (provider?['name'] as String?) ?? 'सूरज गुप्ता';
-    final initial = name.isNotEmpty ? name[0].toUpperCase() : 'S';
-    final category = (provider?['category'] as String?) ?? 'Electrician';
-    final city = (provider?['city'] as String?) ?? 'Lucknow';
-    final phone = (provider?['phone'] as String?) ?? '9876543210';
-    final email = (provider?['email'] as String?) ?? 'suraj@gmail.com';
-    final exp = (provider?['experience_years'] ?? '3-5').toString();
-    final idType = ((provider?['id_type'] as String?) ?? 'aadhaar').toUpperCase();
-    final rawId = (provider?['id_number'] as String?) ?? 'XXXX8921';
-    final idNumber = rawId.length > 4 ? 'XXXX-XXXX-${rawId.substring(rawId.length - 4)}' : rawId;
+    final name = (provider?['name'] as String?) ?? '';
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : '-';
+    final category = (provider?['category'] as String?) ?? '-';
+    final city = (provider?['city'] as String?) ?? '-';
+    final phone = (provider?['phone'] as String?) ?? '-';
+    final email = (provider?['email'] as String?) ?? '-';
+    final exp = (provider?['experience_years'] != null) ? '${provider!['experience_years']}' : '-';
+    final idType = ((provider?['id_type'] as String?) ?? 'Aadhaar').toUpperCase();
+    final rawId = (provider?['id_number'] as String?) ?? '';
+    final idNumber = rawId.isNotEmpty
+        ? (rawId.length > 4 ? 'XXXX-XXXX-${rawId.substring(rawId.length - 4)}' : rawId)
+        : 'सत्यापित डिजिटल आईडी';
     final isVerified = provider?['verification_status'] == 'verified';
 
     return Scaffold(

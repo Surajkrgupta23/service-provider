@@ -27,32 +27,25 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     setState(() => _isLoading = true);
-    try {
-      final response = await ApiClient.dio.post(
-        '',
-        queryParameters: {'action': ApiEndpoints.sendOtp},
-        data: {'phone': phone},
-      );
+    final response = await ApiClient.dio.post(
+      '',
+      queryParameters: {'action': ApiEndpoints.sendOtp},
+      data: {'phone': phone},
+    );
 
-      if (response.data['success'] == true) {
-        if (!mounted) return;
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => OtpScreen(phone: phone)),
-        );
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response.data['message'] ?? 'OTP भेजने में विफल')),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('सर्वर से कनेक्ट नहीं हो सका')),
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (response.data != null && response.data['success'] == true) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => OtpScreen(phone: phone)),
       );
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+    } else {
+      final msg = response.data?['message'] ?? 'OTP भेजने में विफल';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg.toString())),
+      );
     }
   }
 
