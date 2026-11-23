@@ -113,4 +113,18 @@ class Provider {
         $result = $this->db->query("SELECT * FROM categories WHERE status = 1 ORDER BY id ASC");
         return $result->fetch_all(MYSQLI_ASSOC);
     }
+
+    public function getAll(?string $status = null): array {
+        if ($status && in_array($status, ['pending_verification', 'under_review', 'verified', 'rejected'])) {
+            $stmt = $this->db->prepare("SELECT id, name, phone, email, category, city, verification_status, rejection_reason, created_at FROM providers WHERE verification_status = ? ORDER BY id DESC");
+            $stmt->bind_param("s", $status);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $rows = $result->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+            return $rows;
+        }
+        $result = $this->db->query("SELECT id, name, phone, email, category, city, verification_status, rejection_reason, created_at FROM providers ORDER BY id DESC");
+        return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+    }
 }

@@ -106,6 +106,14 @@ try {
             }
             break;
 
+        case 'admin-list-providers':
+            if ($method === 'GET' || $method === 'POST') {
+                $providerController->listProviders();
+            } else {
+                Response::error('Method not allowed', null, 405);
+            }
+            break;
+
         default:
             Response::error("Invalid API endpoint: action='{$action}'", null, 404);
             break;

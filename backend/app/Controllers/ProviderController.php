@@ -148,4 +148,17 @@ class ProviderController {
         $categories = $this->providerModel->getCategories();
         Response::success('Categories loaded', $categories);
     }
+
+    /**
+     * List all providers for Admin
+     * GET /api/admin/providers
+     */
+    public function listProviders(): void {
+        $status = $_GET['status'] ?? null;
+        $providers = $this->providerModel->getAll($status);
+        Response::success('Providers retrieved successfully', [
+            'total'     => count($providers),
+            'providers' => $providers
+        ]);
+    }
 }
