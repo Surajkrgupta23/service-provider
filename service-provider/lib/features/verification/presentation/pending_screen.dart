@@ -97,7 +97,6 @@ class _PendingScreenState extends State<PendingScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Left Brand: Logo + Name
                   Row(
                     children: [
                       Container(
@@ -139,7 +138,6 @@ class _PendingScreenState extends State<PendingScreen> {
                     ],
                   ),
 
-                  // Right Action: Profile Option (Navigates to Full Page)
                   InkWell(
                     onTap: () {
                       Navigator.push(
@@ -198,7 +196,6 @@ class _PendingScreenState extends State<PendingScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-              // Pending Card
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
@@ -248,7 +245,6 @@ class _PendingScreenState extends State<PendingScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Action Buttons
               SizedBox(
                 width: double.infinity,
                 height: 50,

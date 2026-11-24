@@ -1,5 +1,3 @@
-/// Centralized REST API Action Endpoints
-/// Follows SOP Section 9: REST API Standards
 class ApiEndpoints {
   static const String categories   = 'categories';
   static const String districts    = 'districts';

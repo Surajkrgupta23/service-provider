@@ -50,7 +50,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bgCream,
-      // RICH POLISHED APP HEADER BAR
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(62),
         child: Container(
@@ -67,7 +66,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Left Brand: Logo + Name
                   Row(
                     children: [
                       Container(
@@ -109,7 +107,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ],
                   ),
 
-                  // Right Action: Profile Option with Avatar (Navigates to Full Page)
                   InkWell(
                     onTap: () {
                       Navigator.push(
@@ -169,7 +166,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Exact Figma "नमस्ते 🙏" Banner
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(20),
@@ -194,7 +190,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                             const SizedBox(height: 14),
 
-                            // Requested Message
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                               decoration: BoxDecoration(
@@ -220,7 +215,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       const SizedBox(height: 18),
 
-                      // Provider Profile Card
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -261,7 +255,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       const SizedBox(height: 18),
 
-                      // Stats Row
                       Row(
                         children: [
                           _buildStatCard('आज की कमाई', _dashData?['metrics']?['today_earnings']?.toString() ?? '₹0.00'),

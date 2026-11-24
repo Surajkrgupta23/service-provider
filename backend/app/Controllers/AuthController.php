@@ -8,13 +8,16 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../Models/Provider.php';
+require_once __DIR__ . '/../Models/ProviderDocument.php';
 require_once __DIR__ . '/../Helpers/Response.php';
 
 class AuthController {
     private Provider $providerModel;
+    private ProviderDocument $documentModel;
 
     public function __construct() {
         $this->providerModel = new Provider();
+        $this->documentModel = new ProviderDocument();
     }
 
     /**
@@ -135,6 +138,23 @@ class AuthController {
             $errors['city'] = ['कार्य क्षेत्र / शहर दर्ज करें (City required).'];
         }
 
+        // Bank Details Validation (Required)
+        $bankName      = trim($input['bank_name'] ?? '');
+        $accHolderName = trim($input['account_holder_name'] ?? '') ?: $name;
+        $accNumber     = trim($input['account_number'] ?? '');
+        $ifscCode      = strtoupper(trim($input['ifsc_code'] ?? ''));
+        $bankBranch    = trim($input['bank_branch'] ?? '');
+
+        if (empty($bankName)) {
+            $errors['bank_name'] = ['बैंक का नाम दर्ज करना आवश्यक है (Bank Name required).'];
+        }
+        if (empty($accNumber) || strlen($accNumber) < 6) {
+            $errors['account_number'] = ['मान्य बैंक खाता संख्या दर्ज करें (Valid Account Number required).'];
+        }
+        if (empty($ifscCode) || strlen($ifscCode) < 8) {
+            $errors['ifsc_code'] = ['मान्य IFSC कोड दर्ज करें (Valid IFSC Code required).'];
+        }
+
         // Check if phone or email already registered
         if ($this->providerModel->findByPhone($phone)) {
             $errors['phone'] = ['यह मोबाइल नंबर पहले से पंजीकृत है (Phone already registered).'];
@@ -144,27 +164,86 @@ class AuthController {
             $errors['email'] = ['यह ईमेल पहले से पंजीकृत है (Email already registered).'];
         }
 
+        // 1. Handle Profile Photo (Compressed base64 or file upload)
+        $profilePhoto = null;
+        if (!empty($input['profile_photo_base64'])) {
+            $photoData = $input['profile_photo_base64'];
+            if (preg_match('/^data:image\/(\w+);base64,/', $photoData)) {
+                $photoData = substr($photoData, strpos($photoData, ',') + 1);
+            }
+            $photoDecoded = base64_decode($photoData);
+            if ($photoDecoded !== false) {
+                $dir = __DIR__ . '/../../../uploads/photos/';
+                if (!is_dir($dir)) mkdir($dir, 0755, true);
+                $pFilename = 'photo_' . time() . '_' . bin2hex(random_bytes(4)) . '.jpg';
+                file_put_contents($dir . $pFilename, $photoDecoded);
+                $profilePhoto = 'uploads/photos/' . $pFilename;
+            }
+        } elseif (isset($files['profile_photo']) && $files['profile_photo']['error'] === UPLOAD_ERR_OK) {
+            $dir = __DIR__ . '/../../../uploads/photos/';
+            if (!is_dir($dir)) mkdir($dir, 0755, true);
+            $ext = strtolower(pathinfo($files['profile_photo']['name'], PATHINFO_EXTENSION));
+            $pFilename = 'photo_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+            if (move_uploaded_file($files['profile_photo']['tmp_name'], $dir . $pFilename)) {
+                $profilePhoto = 'uploads/photos/' . $pFilename;
+            }
+        }
+
+        // 2. Handle Multiple Dynamic KYC Documents (At least 3 required)
+        $rawDocs = $input['documents'] ?? [];
+        if (is_string($rawDocs)) {
+            $rawDocs = json_decode($rawDocs, true) ?: [];
+        }
+
+        $processedDocs = [];
+        $docsDir = __DIR__ . '/../../../uploads/docs/';
+        if (!is_dir($docsDir)) mkdir($docsDir, 0755, true);
+
+        foreach ($rawDocs as $idx => $d) {
+            $docType   = trim($d['type'] ?? '');
+            $docNumber = trim($d['number'] ?? '');
+            $docPath   = null;
+
+            if (!empty($d['file_base64'])) {
+                $fileData = $d['file_base64'];
+                if (preg_match('/^data:(image\/\w+|application\/pdf);base64,/', $fileData)) {
+                    $fileData = substr($fileData, strpos($fileData, ',') + 1);
+                }
+                $fileDecoded = base64_decode($fileData);
+                if ($fileDecoded !== false) {
+                    $dFilename = 'doc_' . time() . '_' . $idx . '_' . bin2hex(random_bytes(3)) . '.jpg';
+                    file_put_contents($docsDir . $dFilename, $fileDecoded);
+                    $docPath = 'uploads/docs/' . $dFilename;
+                }
+            }
+
+            if (!empty($docType) && !empty($docNumber)) {
+                $processedDocs[] = [
+                    'type'   => $docType,
+                    'number' => $docNumber,
+                    'file'   => $docPath
+                ];
+            }
+        }
+
+        if (count($processedDocs) < 2) {
+            $errors['documents'] = ['कम से कम 2 वैध दस्तावेज़ (आधार कार्ड व पैन कार्ड) जोड़ना आवश्यक है (Aadhaar & PAN Required).'];
+        }
+
+        if (empty($profilePhoto)) {
+            $errors['profile_photo'] = ['पार्टनर प्रोफाइल फोटो अपलोड करना आवश्यक है (Profile photo required).'];
+        }
+
         if (!empty($errors)) {
-            Response::validationError($errors, 'कृपया सभी आवश्यक फ़ील्ड सही तरीके से भरें।');
+            Response::validationError($errors, 'कृपया सभी आवश्यक फ़ील्ड एवं आधार व पैन कार्ड भरें।');
             return;
         }
 
-        // Handle File Upload if provided
-        $uploadedDoc = null;
-        if (isset($files['id_document']) && $files['id_document']['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = __DIR__ . '/../../../uploads/';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-            $ext = strtolower(pathinfo($files['id_document']['name'], PATHINFO_EXTENSION));
-            $allowedExts = ['jpg', 'jpeg', 'png', 'pdf'];
-            if (in_array($ext, $allowedExts)) {
-                $filename = 'id_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-                if (move_uploaded_file($files['id_document']['tmp_name'], $uploadDir . $filename)) {
-                    $uploadedDoc = 'uploads/' . $filename;
-                }
-            }
-        }
+        $primaryDoc = $processedDocs[0] ?? null;
+        $idType = $primaryDoc['type'] ?? $idType;
+        $idNumber = $primaryDoc['number'] ?? $idNumber;
+        $uploadedDoc = $primaryDoc['file'] ?? null;
+        $idDocumentsJson = json_encode($processedDocs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         // PACS & Location Fields
         $districtId   = !empty($input['district_id']) ? $input['district_id'] : null;
@@ -194,6 +273,8 @@ class AuthController {
             'id_type'             => $idType,
             'id_number'           => $idNumber,
             'id_document'         => $uploadedDoc,
+            'id_documents_json'   => $idDocumentsJson,
+            'profile_photo'       => $profilePhoto,
             'verification_status' => 'pending_verification',
             'auth_token'          => $token,
             'token_expires_at'    => $expiresAt,
@@ -205,7 +286,22 @@ class AuthController {
             'block_name'          => $blockName,
             'pacs_id'             => $pacsId,
             'pacs_name'           => $pacsName,
+            'bank_name'           => $bankName,
+            'account_holder_name' => $accHolderName,
+            'account_number'      => $accNumber,
+            'ifsc_code'           => $ifscCode,
+            'bank_branch'         => $bankBranch,
         ]);
+
+        // Save each document in the dedicated provider_documents table
+        foreach ($processedDocs as $doc) {
+            $this->documentModel->addDocument(
+                $providerId,
+                $doc['type'],
+                $doc['number'],
+                $doc['file']
+            );
+        }
 
         $provider = $this->providerModel->findById($providerId);
         unset($provider['password']);
@@ -222,7 +318,7 @@ class AuthController {
      * POST /api/login
      */
     public function login(array $input): void {
-        $loginId  = trim($input['login_id'] ?? '');
+        $loginId  = trim($input['login_id'] ?? ($input['phone'] ?? ''));
         $password = $input['password'] ?? '';
 
         if (empty($loginId) || empty($password)) {

@@ -18,7 +18,10 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Cooperative Clap - Service Provider">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
 
   <!--
     Uncomment the tag below to lay the app out underneath the parts of the
@@ -53,6 +56,25 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
-  <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // Ensure fresh build is always served and unregister any stale service workers
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (var registration of registrations) {
+          registration.unregister();
+        }
+      });
+      if (window.caches) {
+        caches.keys().then(function(names) {
+          for (var name of names) caches.delete(name);
+        });
+      }
+    }
+    // Dynamic cache-busting script injection
+    var script = document.createElement('script');
+    script.src = 'flutter_bootstrap.js?t=' + new Date().getTime();
+    script.async = true;
+    document.body.appendChild(script);
+  </script>
 </body>
 </html>

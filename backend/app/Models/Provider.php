@@ -59,41 +59,50 @@ class Provider {
     public function create(array $data): int {
         $sql = "INSERT INTO providers (
             name, phone, email, password, category, experience_years, 
-            city, id_type, id_number, id_document, verification_status, 
+            city, id_type, id_number, id_document, id_documents_json, profile_photo, verification_status, 
             auth_token, token_expires_at,
-            district_id, district_name, tehseel_id, tehseel_name, block_id, block_name, pacs_id, pacs_name
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            district_id, district_name, tehseel_id, tehseel_name, block_id, block_name, pacs_id, pacs_name,
+            bank_name, account_holder_name, account_number, ifsc_code, bank_branch
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->db->prepare($sql);
         
-        $name         = $data['name'];
-        $phone        = $data['phone'];
-        $email        = $data['email'];
-        $password     = $data['password'];
-        $category     = $data['category'];
-        $expYears     = (int)($data['experience_years'] ?? 0);
-        $city         = $data['city'];
-        $idType       = $data['id_type'] ?? null;
-        $idNumber     = $data['id_number'] ?? null;
-        $idDocument   = $data['id_document'] ?? null;
-        $status       = $data['verification_status'] ?? 'pending_verification';
-        $authToken    = $data['auth_token'];
-        $expiresAt    = $data['token_expires_at'] ?? null;
-        $districtId   = isset($data['district_id']) && $data['district_id'] !== '' ? (int)$data['district_id'] : null;
-        $districtName = $data['district_name'] ?? null;
-        $tehseelId    = isset($data['tehseel_id']) && $data['tehseel_id'] !== '' ? (int)$data['tehseel_id'] : null;
-        $tehseelName  = $data['tehseel_name'] ?? null;
-        $blockId      = isset($data['block_id']) && $data['block_id'] !== '' ? (int)$data['block_id'] : null;
-        $blockName    = $data['block_name'] ?? null;
-        $pacsId       = isset($data['pacs_id']) && $data['pacs_id'] !== '' ? (int)$data['pacs_id'] : null;
-        $pacsName     = $data['pacs_name'] ?? null;
+        $name             = $data['name'];
+        $phone            = $data['phone'];
+        $email            = $data['email'];
+        $password         = $data['password'];
+        $category         = $data['category'];
+        $expYears         = (int)($data['experience_years'] ?? 0);
+        $city             = $data['city'];
+        $idType           = $data['id_type'] ?? null;
+        $idNumber         = $data['id_number'] ?? null;
+        $idDocument       = $data['id_document'] ?? null;
+        $idDocumentsJson  = $data['id_documents_json'] ?? null;
+        $profilePhoto     = $data['profile_photo'] ?? null;
+        $status           = $data['verification_status'] ?? 'pending_verification';
+        $authToken        = $data['auth_token'];
+        $expiresAt        = $data['token_expires_at'] ?? null;
+        $districtId       = isset($data['district_id']) && $data['district_id'] !== '' ? (int)$data['district_id'] : null;
+        $districtName     = $data['district_name'] ?? null;
+        $tehseelId        = isset($data['tehseel_id']) && $data['tehseel_id'] !== '' ? (int)$data['tehseel_id'] : null;
+        $tehseelName      = $data['tehseel_name'] ?? null;
+        $blockId          = isset($data['block_id']) && $data['block_id'] !== '' ? (int)$data['block_id'] : null;
+        $blockName        = $data['block_name'] ?? null;
+        $pacsId           = isset($data['pacs_id']) && $data['pacs_id'] !== '' ? (int)$data['pacs_id'] : null;
+        $pacsName         = $data['pacs_name'] ?? null;
+        $bankName         = $data['bank_name'] ?? null;
+        $accHolderName    = $data['account_holder_name'] ?? null;
+        $accNumber        = $data['account_number'] ?? null;
+        $ifscCode         = $data['ifsc_code'] ?? null;
+        $bankBranch       = $data['bank_branch'] ?? null;
 
         $stmt->bind_param(
-            "sssssisssssssisisisis",
+            "sssssisssssssssisisisissssss",
             $name, $phone, $email, $password, $category, $expYears,
-            $city, $idType, $idNumber, $idDocument, $status,
+            $city, $idType, $idNumber, $idDocument, $idDocumentsJson, $profilePhoto, $status,
             $authToken, $expiresAt,
-            $districtId, $districtName, $tehseelId, $tehseelName, $blockId, $blockName, $pacsId, $pacsName
+            $districtId, $districtName, $tehseelId, $tehseelName, $blockId, $blockName, $pacsId, $pacsName,
+            $bankName, $accHolderName, $accNumber, $ifscCode, $bankBranch
         );
 
         $stmt->execute();
@@ -120,16 +129,34 @@ class Provider {
     }
 
     public function getAll(?string $status = null): array {
+        $fields = "id, name, phone, email, category, city, profile_photo, district_name, tehseel_name, block_name, pacs_name, bank_name, account_holder_name, account_number, ifsc_code, bank_branch, verification_status, rejection_reason, created_at";
         if ($status && in_array($status, ['pending_verification', 'under_review', 'verified', 'rejected'])) {
-            $stmt = $this->db->prepare("SELECT id, name, phone, email, category, city, verification_status, rejection_reason, created_at FROM providers WHERE verification_status = ? ORDER BY id DESC");
+            $stmt = $this->db->prepare("SELECT {$fields} FROM providers WHERE verification_status = ? ORDER BY id DESC");
             $stmt->bind_param("s", $status);
             $stmt->execute();
             $result = $stmt->get_result();
             $rows = $result->fetch_all(MYSQLI_ASSOC);
             $stmt->close();
-            return $rows;
+        } else {
+            $result = $this->db->query("SELECT {$fields} FROM providers ORDER BY id DESC");
+            $rows = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
         }
-        $result = $this->db->query("SELECT id, name, phone, email, category, city, verification_status, rejection_reason, created_at FROM providers ORDER BY id DESC");
-        return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+
+        if (!empty($rows)) {
+            $ids = array_column($rows, 'id');
+            $idList = implode(',', array_map('intval', $ids));
+            $docRes = $this->db->query("SELECT * FROM provider_documents WHERE provider_id IN ({$idList}) ORDER BY id ASC");
+            $docsByProvider = [];
+            if ($docRes) {
+                while ($doc = $docRes->fetch_assoc()) {
+                    $docsByProvider[$doc['provider_id']][] = $doc;
+                }
+            }
+            foreach ($rows as &$r) {
+                $r['documents'] = $docsByProvider[$r['id']] ?? [];
+            }
+        }
+
+        return $rows;
     }
 }

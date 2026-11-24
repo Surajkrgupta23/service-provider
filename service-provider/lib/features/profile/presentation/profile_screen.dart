@@ -53,7 +53,6 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Profile Hero Card
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -113,7 +112,6 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // Section 1: व्यक्तिगत विवरण (Personal Details)
                 _buildSectionCard(
                   title: 'व्यक्तिगत विवरण (Personal Info)',
                   icon: Icons.person_rounded,
@@ -129,7 +127,6 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // Section 2: केवाईसी एवं दस्तावेज़ (KYC & Documents)
                 _buildSectionCard(
                   title: 'केवाईसी एवं दस्तावेज़ (KYC & Documents)',
                   icon: Icons.badge_rounded,
@@ -143,7 +140,6 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // Section 3: 2-3 Future Options
                 _buildSectionCard(
                   title: 'आगामी सुविधाएं (Future Features)',
                   icon: Icons.auto_awesome_rounded,
@@ -178,7 +174,6 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Logout Button
                 SizedBox(
                   height: 48,
                   child: OutlinedButton.icon(

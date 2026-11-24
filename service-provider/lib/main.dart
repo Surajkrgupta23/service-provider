@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/constants/colors.dart';
 import 'core/network/api_client.dart';
 import 'features/auth/presentation/login_screen.dart';
@@ -10,9 +9,7 @@ void main() async {
   final token = await ApiClient.getToken();
 
   runApp(
-    ProviderScope(
-      child: CooperativeClapApp(isLoggedIn: token != null),
-    ),
+    CooperativeClapApp(isLoggedIn: token != null),
   );
 }
 
@@ -27,10 +24,17 @@ class CooperativeClapApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        scaffoldBackgroundColor: AppColors.bgCream,
+        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
+        fontFamily: 'Roboto',
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppColors.brandOrange,
           primary: AppColors.brandOrange,
+          surface: Colors.white,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          foregroundColor: AppColors.textHeading,
+          elevation: 0,
         ),
       ),
       home: isLoggedIn ? const DashboardScreen() : const LoginScreen(),

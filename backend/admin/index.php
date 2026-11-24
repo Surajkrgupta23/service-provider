@@ -902,6 +902,22 @@ $admin = $_SESSION['admin_user'];
 
             tbody.innerHTML = filtered.map(p => {
                 const initial = p.name ? p.name.charAt(0).toUpperCase() : 'P';
+                const avatarHtml = p.profile_photo 
+                    ? `<img src="/CP-APPP/service-provider/backend/${escapeHtml(p.profile_photo)}" class="avatar" style="object-fit:cover;" />` 
+                    : `<div class="avatar">${initial}</div>`;
+                let docBadge = '';
+                if (p.documents && p.documents.length > 0) {
+                    const docLinks = p.documents.map(d => {
+                        const fileLink = d.file_path ? `<a href="/CP-APPP/service-provider/backend/${escapeHtml(d.file_path)}" target="_blank" style="color:#0284C7; text-decoration:underline;">[View]</a>` : '';
+                        return `<span style="display:inline-block; margin-right:6px;">• ${escapeHtml(d.document_type)}: <strong>${escapeHtml(d.document_number)}</strong> ${fileLink}</span>`;
+                    }).join(' ');
+                    docBadge = `<div style="font-size:11px; color:#059669; font-weight:700; margin-top:3px;">📁 ${p.documents.length} Docs: ${docLinks}</div>`;
+                } else if (p.id_documents_json) {
+                    try {
+                        const docs = JSON.parse(p.id_documents_json);
+                        docBadge = `<div style="font-size:11px; color:#059669; font-weight:700; margin-top:2px;">📁 ${docs.length} KYC Docs</div>`;
+                    } catch (_) {}
+                }
                 const skills = p.category ? p.category.split(',').map(s => `<span class="chip">${escapeHtml(s.trim())}</span>`).join('') : '<span class="chip">General</span>';
                 const status = p.verification_status || 'pending_verification';
                 const formattedDate = p.created_at ? p.created_at.split(' ')[0] : '-';
@@ -924,10 +940,11 @@ $admin = $_SESSION['admin_user'];
                     <tr>
                         <td>
                             <div class="provider-info">
-                                <div class="avatar">${initial}</div>
+                                ${avatarHtml}
                                 <div>
                                     <div class="provider-name">${escapeHtml(p.name)}</div>
                                     <div class="provider-id">ID: #${p.id}</div>
+                                    ${docBadge}
                                 </div>
                             </div>
                         </td>
@@ -940,6 +957,7 @@ $admin = $_SESSION['admin_user'];
                             <div><strong>${escapeHtml(p.city || '-')}</strong></div>
                             ${p.pacs_name ? `<div style="font-size:11.5px; color:#EA580C; font-weight:700; margin-top:2px;">🏢 ${escapeHtml(p.pacs_name)}</div>` : ''}
                             ${p.district_name ? `<div style="font-size:11px; color:var(--gray-500);">${escapeHtml(p.district_name)}${p.block_name ? ` • Block: ` + escapeHtml(p.block_name) : ''}</div>` : ''}
+                            ${p.bank_name ? `<div style="font-size:11px; color:#2563EB; font-weight:600; margin-top:2px;">🏦 ${escapeHtml(p.bank_name)} (A/C: ${escapeHtml(p.account_number || '')}) • IFSC: ${escapeHtml(p.ifsc_code || '')}</div>` : ''}
                         </td>
                         <td><span class="badge ${status}">${formatStatus(status)}</span></td>
                         <td>${formattedDate}</td>
